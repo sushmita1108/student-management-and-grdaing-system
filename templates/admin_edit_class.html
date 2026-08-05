@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if academic_class else 'Create' }} SNS College Class{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ 'Edit' if academic_class else 'Create' }} Academic Class</h1>
+        <p class="page-subtitle">Maintain academic class metadata and advisor assignments.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin_manage_classes') }}" class="btn btn-secondary">&larr; Back to Classes</a>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('admin_edit_class', class_id=academic_class.id) if academic_class else url_for('admin_create_class') }}">
+        {{ csrf_field() }}
+        <div class="form-group">
+            <label class="form-label" for="code">Class Code</label>
+            <input type="text" id="code" name="code" class="form-control" value="{{ academic_class.code if academic_class else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="name">Class Name</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ academic_class.name if academic_class else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="department">Department</label>
+            <input type="text" id="department" name="department" class="form-control" value="{{ academic_class.department if academic_class else '' }}" placeholder="Engineering, Medicine, Management, Science, Humanities" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="level">Academic Level</label>
+            <select id="level" name="level" class="form-control">
+                <option value="Bachelor" selected>Bachelor</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="advisor_id">Faculty Advisor</label>
+            <select id="advisor_id" name="advisor_id" class="form-control">
+                <option value="">No Advisor Assigned</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}" {% if academic_class and academic_class.advisor_id == teacher.id %}selected{% endif %}>{{ teacher.full_name }} ({{ teacher.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">Description</label>
+            <textarea id="description" name="description" class="form-control" rows="4">{{ academic_class.description if academic_class else '' }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+            <a href="{{ url_for('admin_manage_classes') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{{ 'Update' if academic_class else 'Create' }} Class</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

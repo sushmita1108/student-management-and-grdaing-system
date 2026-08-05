@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if subject else 'Create' }} Research Module{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ 'Edit' if subject else 'Create' }} Research Module</h1>
+        <p class="page-subtitle">Configure independent SNS College research modules with faculty and department mapping. This portal is managed as a non-university academic institute.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">&larr; Back to Research Modules</a>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('admin_edit_subject', subject_id=subject.id) if subject else url_for('admin_create_subject') }}">
+        {{ csrf_field() }}
+        <div class="form-group">
+            <label class="form-label" for="code">Research Module Code</label>
+            <input type="text" id="code" name="code" class="form-control" value="{{ subject.code if subject else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="name">Research Module / Subject Name</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ subject.name if subject else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="faculty">Department</label>
+            <select id="faculty" name="faculty" class="form-control">
+                {% set faculty_value = subject.faculty if subject else '' %}
+                <option value="" disabled {% if not faculty_value %}selected{% endif %}>Select Department</option>
+                <option value="Engineering" {% if faculty_value == 'Engineering' %}selected{% endif %}>Engineering</option>
+                <option value="Medicine" {% if faculty_value == 'Medicine' %}selected{% endif %}>Medicine</option>
+                <option value="Management" {% if faculty_value == 'Management' %}selected{% endif %}>Management</option>
+                <option value="Science" {% if faculty_value == 'Science' %}selected{% endif %}>Science</option>
+                <option value="Humanities" {% if faculty_value == 'Humanities' %}selected{% endif %}>Humanities</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="level">Academic Level</label>
+            <select id="level" name="level" class="form-control">
+                <option value="Bachelor" selected>Bachelor</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="credits">ECTS Credits</label>
+            <input type="number" id="credits" name="credits" class="form-control" value="{{ subject.credits if subject else 3 }}" min="1" max="6">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="assigned_teacher_id">Assigned Teacher</label>
+            <select id="assigned_teacher_id" name="assigned_teacher_id" class="form-control">
+                <option value="">No Assigned Teacher</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}" {% if subject and subject.assigned_teacher_id == teacher.id %}selected{% endif %}>{{ teacher.full_name }} ({{ teacher.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+            <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{{ 'Update' if subject else 'Create' }} Subject</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

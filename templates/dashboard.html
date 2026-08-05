@@ -1,32 +1,68 @@
 {% extends 'base.html' %}
 
-{% block title %}University Dashboard | SNS International University{% endblock %}
+{% block title %}College Dashboard{% endblock %}
 
 {% block content %}
-<!-- Welcome University Hero Banner -->
+<!-- Welcome College Hero Banner -->
 <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(245, 158, 11, 0.15)); border: 1px solid rgba(6, 182, 212, 0.4); padding: 2.25rem; margin-bottom: 2rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
         <div>
             <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.5rem;">
-                <h1 class="page-title" style="margin-bottom: 0; background: linear-gradient(135deg, #ffffff, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    Welcome, {{ current_user.full_name }} 👋
+                <h1 class="page-title" style="margin-bottom: 0; background: linear-gradient(135deg, #ffffff, #67e8f9); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Welcome, {{ current_user.full_name }} 
                 </h1>
                 <span class="badge badge-teacher">
-                    Faculty {{ current_user.role }}
+                    {{ current_user.role }} Portal
                 </span>
             </div>
             <p style="color: var(--text-muted); font-size: 0.98rem; max-width: 720px;">
-                Verified Account: <strong>{{ current_user.email }}</strong>. Welcome to the SNS Global Academic & Intelligence Portal. Overseeing scholar enrollments, ECTS credit allocations, and high-impact STEM research evaluations across global campus nodes.
+                Verified Account: <strong>{{ current_user.email }}</strong>. Welcome to the SNS College student grading portal. Manage student records, programs, and grade evaluations for the college.
             </p>
         </div>
-        <div style="display: flex; gap: 0.85rem;">
+        {% if current_user.role != 'Student' %}
+        <div style="display: flex; gap: 0.85rem; flex-wrap: wrap;">
             <a href="{{ url_for('add_student') }}" class="btn btn-primary">+ Enroll Scholar</a>
             <a href="{{ url_for('grades') }}" class="btn btn-gold">📝 Issue Evaluation</a>
+            {% if current_user.role == 'Teacher' or current_user.role == 'Admin' %}
+            <a href="{{ url_for('assigned_subjects') }}" class="btn btn-secondary">📚 Assigned Subjects</a>
+            {% endif %}
+            {% if current_user.role == 'Admin' %}
+            <a href="{{ url_for('admin_assign_subjects') }}" class="btn btn-secondary">⚙️ Assign Teachers</a>
+            <a href="{{ url_for('admin_manage_users') }}" class="btn btn-secondary">👥 Manage Accounts</a>
+            <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">📘 Manage Subjects</a>
+            <a href="{{ url_for('admin_manage_classes') }}" class="btn btn-secondary">🏫 Manage Classes</a>
+            {% endif %}
         </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- University Metrics Grid -->
+{% if student_profile %}
+<div class="card" style="margin-bottom: 2rem; padding: 1.75rem; border: 1px solid rgba(6, 182, 212, 0.35);">
+    <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 240px; align-items: center;">
+        <div>
+            <h2 style="font-size: 1.45rem; margin-bottom: 0.5rem;">My Student Summary</h2>
+            <p style="color: var(--text-muted);">This view is personalized for your student account. Only your grades and academic profile are shown.</p>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li><strong>Program:</strong> {{ student_profile.grade_level }}</li>
+                <li><strong>Faculty:</strong> {{ student_profile.faculty }}</li>
+                <li><strong>Status:</strong> {{ student_profile.status }}</li>
+                <li><strong>GPA:</strong> {{ student_profile.gpa }} / 4.0</li>
+                <li><strong>Grades Submitted:</strong> {{ student_grade_count }}</li>
+            </ul>
+        </div>
+        <div style="background: rgba(6, 182, 212, 0.08); padding: 1rem; border-radius: 18px; text-align: center;">
+            <div style="font-size: 3rem; font-weight: 900; color: var(--accent-cyan-light);">{{ student_profile.gpa }}</div>
+            <div style="margin-top: 0.5rem; color: var(--text-muted);">Your current GPA</div>
+        </div>
+    </div>
+    <div style="margin-top: 1rem;">
+        <a href="{{ url_for('profile') }}" class="btn btn-primary">View My Profile & Report Card</a>
+    </div>
+</div>
+{% endif %}
+
+<!-- College Metrics Grid -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <!-- Metric 1: Scholars -->
     <div class="card card-hover" style="margin: 0; padding: 1.5rem;">
@@ -126,7 +162,7 @@
                             <span class="badge" style="background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan-light); font-size: 0.7rem; margin-top: 0.2rem; border: 1px solid rgba(6, 182, 212, 0.3);">{{ grade.subject.code }} • {{ grade.subject.credits }} ECTS Credits</span>
                         </td>
                         <td style="font-weight: 800; color: #f8fafc;">{{ "%.1f"|format(grade.score) }}%</td>
-                        <td><span class="badge badge-grade">{{ grade.letter_grade }}</span></td>
+                        <td><span class="badge badge-grade">{{ grade.display_letter_grade }}</span></td>
                         <td style="color: var(--text-muted); font-size: 0.85rem;">{{ grade.term }}</td>
                     </tr>
                     {% else %}

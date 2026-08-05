@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Scholar | SNS International University{% endblock %}
+{% block title %}Edit Scholar{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -20,6 +20,7 @@
         </h2>
 
         <form method="POST" action="{{ url_for('edit_student', id=student.id) }}">
+            {{ csrf_field() }}
             <div class="form-group">
                 <label class="form-label" for="student_code">Scholar ID / Code</label>
                 <input type="text" id="student_code" name="student_code" class="form-control" value="{{ student.student_code }}" required style="font-family: monospace;">
@@ -37,13 +38,31 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="email">University Email Address</label>
+                <label class="form-label" for="email">College Email Address</label>
                 <input type="email" id="email" name="email" class="form-control" value="{{ student.email }}" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="grade_level">Degree Program / Academic Track</label>
                 <input type="text" id="grade_level" name="grade_level" class="form-control" value="{{ student.grade_level }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="faculty">Faculty</label>
+                <select id="faculty" name="faculty" class="form-control" required onchange="updateAcademicPeriodOptions()">
+                    <option value="" disabled {% if not student.faculty %}selected{% endif %}>-- Select Faculty --</option>
+                    <option value="Science & Technology" {% if student.faculty == 'Science & Technology' %}selected{% endif %}>Science & Technology</option>
+                    <option value="Management" {% if student.faculty == 'Management' %}selected{% endif %}>Management</option>
+                    <option value="Humanities" {% if student.faculty == 'Humanities' %}selected{% endif %}>Humanities</option>
+                    <option value="General" {% if student.faculty == 'General' %}selected{% endif %}>General</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="academic_period">Academic Period</label>
+                <select id="academic_period" name="academic_period" class="form-control" required>
+                    <option value="" disabled selected>-- Select Academic Period --</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -64,4 +83,32 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateAcademicPeriodOptions() {
+    const faculty = document.getElementById('faculty').value;
+    const periodSelect = document.getElementById('academic_period');
+    const engineeringPeriods = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'];
+    const yearPeriods = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
+    const options = faculty === 'Engineering' ? engineeringPeriods : yearPeriods;
+    const currentPeriod = '{{ student.academic_period }}';
+
+    periodSelect.innerHTML = '<option value="" disabled>-- Select Academic Period --</option>';
+    options.forEach(period => {
+        const option = document.createElement('option');
+        option.value = period;
+        option.textContent = period;
+        if (period === currentPeriod) {
+            option.selected = true;
+        }
+        periodSelect.appendChild(option);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateAcademicPeriodOptions();
+});
+</script>
 {% endblock %}

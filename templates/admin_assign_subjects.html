@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Subjects to Teachers | SNS College{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Assign Subjects to Teachers</h1>
+        <p class="page-subtitle">Use this page to assign or remove teachers from subjects across the SNS College curriculum.</p>
+    </div>
+</div>
+
+<div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+    <form method="POST" action="{{ url_for('admin_assign_subjects') }}">
+        {{ csrf_field() }}
+        <div class="form-group">
+            <label class="form-label" for="subject_id">Subject</label>
+            <select id="subject_id" name="subject_id" class="form-control" required>
+                <option value="" disabled selected>Choose a subject</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.code }} - {{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="teacher_id">Assign to Teacher</label>
+            <select id="teacher_id" name="teacher_id" class="form-control">
+                <option value="">Unassign</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}">{{ teacher.full_name }} ({{ teacher.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">Save Assignment</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="font-weight: 800; margin-bottom: 1rem;">Today’s Assigned Subjects</h3>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Teacher</th>
+                    <th>Faculty</th>
+                    <th>Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject.code }}</td>
+                    <td>{{ subject.name }}</td>
+                    <td>
+                        {% if subject.assigned_teacher %}
+                            {{ subject.assigned_teacher.full_name }}
+                        {% else %}
+                            <span style="color: var(--text-muted);">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ subject.faculty or 'General' }}</td>
+                    <td>{{ subject.level or 'Bachelor' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

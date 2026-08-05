@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage SNS College Classes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Manage Academic Classes</h1>
+        <p class="page-subtitle">Create and maintain class sections, advisors, and degree tracks.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin_create_class') }}" class="btn btn-primary">+ Create Class</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Level</th>
+                    <th>Advisor</th>
+                    <th>Description</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for academic_class in classes %}
+                <tr>
+                    <td>{{ academic_class.code }}</td>
+                    <td>{{ academic_class.name }}</td>
+                    <td>{{ academic_class.department }}</td>
+                    <td>{{ academic_class.level }}</td>
+                    <td>{{ academic_class.advisor.full_name if academic_class.advisor else 'None' }}</td>
+                    <td>{{ academic_class.description or 'No description' }}</td>
+                    <td style="text-align: right;">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap;">
+                            <a href="{{ url_for('admin_edit_class', class_id=academic_class.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                            <form method="POST" action="{{ url_for('admin_delete_class', class_id=academic_class.id) }}" style="display: inline;" onsubmit="return confirm('Delete this class?');">
+                                {{ csrf_field() }}
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No academic classes are defined yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

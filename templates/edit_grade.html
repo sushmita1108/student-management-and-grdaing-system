@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Grade Record | SNS College{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Edit Grade Record</h1>
+        <p class="page-subtitle">Update score, letter grade, and term for the selected student evaluation.</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 640px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('edit_grade', grade_id=grade.id) }}">
+        {{ csrf_field() }}
+        <div class="form-group">
+            <label class="form-label">Scholar</label>
+            <input type="text" class="form-control" value="{{ grade.student.full_name }} ({{ grade.student.student_code }})" readonly>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Subject</label>
+            <input type="text" class="form-control" value="{{ grade.subject.code }} - {{ grade.subject.name }}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="score">Updated Score %</label>
+            <input type="number" step="0.1" min="0" max="100" id="score" name="score" class="form-control" value="{{ grade.score }}" required oninput="calculateGradePreview(this.value)">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="term">Session Term</label>
+            <input type="text" id="term" name="term" class="form-control" value="{{ grade.term }}" required>
+        </div>
+
+        <div id="gradePreview" style="margin-top: 1rem; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; background: rgba(10, 16, 32, 0.95); border: 1px solid var(--border-cyan); border-radius: var(--radius-sm); font-size: 0.9rem;">
+                <span>Estimated Letter Grade</span>
+                <span id="previewLetter" class="badge badge-grade">{{ grade.display_letter_grade }}</span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">Save Changes</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calculateGradePreview(val) {
+    const score = parseFloat(val);
+    const container = document.getElementById('gradePreview');
+    const letterSpan = document.getElementById('previewLetter');
+    if (isNaN(score)) {
+        container.style.display = 'none';
+        return;
+    }
+    let grade = 'F (0.0 GPA)';
+    if (score >= 93) grade = 'A (4.0 GPA)';
+    else if (score >= 90) grade = 'A- (3.7 GPA)';
+    else if (score >= 87) grade = 'B+ (3.3 GPA)';
+    else if (score >= 83) grade = 'B (3.0 GPA)';
+    else if (score >= 80) grade = 'B- (2.7 GPA)';
+    else if (score >= 77) grade = 'C+ (2.3 GPA)';
+    else if (score >= 73) grade = 'C (2.0 GPA)';
+    else if (score >= 70) grade = 'C- (1.7 GPA)';
+    else if (score >= 60) grade = 'D (Fail)';
+    letterSpan.textContent = grade;
+    container.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    calculateGradePreview(document.getElementById('score').value || 0);
+});
+</script>
+{% endblock %}

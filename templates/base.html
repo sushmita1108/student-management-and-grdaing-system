@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SNS International University | Global Portal{% endblock %}</title>
+    <title>{% block title %}SNS College Portal{% endblock %}</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,6 +135,7 @@
             color: #ffffff;
             line-height: 1.1;
             background: linear-gradient(135deg, #ffffff, #67e8f9);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -619,38 +620,40 @@
             .content-body { padding: 1.25rem; }
         }
     </style>
-    {% block extra_css %}{% endblock %}
 </head>
 <body>
+    {% macro csrf_field() %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endmacro %}
     {% if g.user %}
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
         <a href="{{ url_for('dashboard') }}" class="university-brand">
             <div class="crest-icon">SNS</div>
             <div class="brand-text">
-                <span class="brand-name">SNS UNIVERSITY</span>
-                <span class="brand-sub">Global Institute of Tech</span>
+                <span class="brand-name">SNS COLLEGE</span>
+                <span class="brand-sub">Independent Student Grading Portal</span>
             </div>
         </a>
 
         <div class="world-rank-badge">
-            <span>🏆 #1 QS Global Rank</span>
-            <span>2026/27</span>
+            <span>🏛️ SNS College • Independent Institute</span>
+            <span>Academic Year 2083/84</span>
         </div>
 
         <div class="campus-pill">
             <span class="pulse-dot"></span>
-            <span>Silicon Valley • Zurich • Cambridge</span>
+            <span>Kathmandu • Pokhara • Lalitpur</span>
         </div>
 
-        <div class="nav-section-title">Global Academic Portal</div>
+        <div class="nav-section-title">SNS College Academic Management</div>
         <ul class="nav-links">
             <li>
                 <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
-                    <span>University Dashboard</span>
+                    <span>College Dashboard</span>
                 </a>
             </li>
             <li>
@@ -661,6 +664,16 @@
                     <span>Scholars Directory</span>
                 </a>
             </li>
+            {% if g.user.role == 'Student' %}
+            <li>
+                <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zm-4 5a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6z" />
+                    </svg>
+                    <span>My Profile</span>
+                </a>
+            </li>
+            {% endif %}
             <li>
                 <a href="{{ url_for('grades') }}" class="nav-link {% if request.endpoint == 'grades' %}active{% endif %}">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -671,6 +684,37 @@
             </li>
         </ul>
 
+        {% if g.user.role == 'Admin' %}
+        <div class="nav-section-title">Administrator Tools</div>
+        <ul class="nav-links">
+            <li>
+                <a href="{{ url_for('admin_manage_users') }}" class="nav-link {% if request.endpoint in ['admin_manage_users', 'admin_create_user', 'admin_edit_user'] %}active{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A9.953 9.953 0 0112 15c2.39 0 4.604.8 6.379 2.152M15 11a3 3 0 11-6 0 3 3 0 016 0zM19 20v-1a4 4 0 00-4-4H9a4 4 0 00-4 4v1" />
+                    </svg>
+                    <span>Manage Accounts</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin_manage_subjects') }}" class="nav-link {% if request.endpoint in ['admin_manage_subjects', 'admin_create_subject', 'admin_edit_subject'] %}active{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1112.21 3" />
+                    </svg>
+                    <span>Manage Subjects</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin_manage_classes') }}" class="nav-link {% if request.endpoint in ['admin_manage_classes', 'admin_create_class', 'admin_edit_class'] %}active{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M3 13h18M5 21h14a2 2 0 002-2V9H3v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>Manage Classes</span>
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+
         <div class="sidebar-footer">
             <div class="user-profile-card">
                 <div style="display: flex; align-items: center; gap: 0.75rem; overflow: hidden;">
@@ -679,7 +723,7 @@
                     </div>
                     <div class="user-info">
                         <span class="user-name">{{ g.user.full_name }}</span>
-                        <span class="user-role-badge">Faculty {{ g.user.role }}</span>
+                        <span class="user-role-badge">{{ g.user.role }}</span>
                     </div>
                 </div>
                 <a href="{{ url_for('logout') }}" class="btn-logout-icon" title="Sign Out">
@@ -698,12 +742,14 @@
         <!-- Topbar -->
         <header class="topbar">
             <div class="topbar-title-section">
-                <span class="portal-tag">SNS Global Intelligence Portal</span>
-                <span style="color: var(--text-dim); font-size: 0.85rem;">Fall Semester 2026/27 • Live Network Node</span>
+                <span class="portal-tag">SNS College Academic Portal</span>
+                <span style="color: var(--text-dim); font-size: 0.85rem;">SNS College Academic Year 2083 • Secure Role Portal</span>
             </div>
             <div class="topbar-actions">
-                <a href="{{ url_for('add_student') }}" class="btn btn-primary btn-sm">+ Enroll Scholar</a>
-                <a href="{{ url_for('grades') }}" class="btn btn-gold btn-sm">📝 Issue Evaluation</a>
+                {% if g.user.role != 'Student' %}
+                    <a href="{{ url_for('add_student') }}" class="btn btn-primary btn-sm">+ Enroll Scholar</a>
+                    <a href="{{ url_for('grades') }}" class="btn btn-gold btn-sm">📝 Issue Evaluation</a>
+                {% endif %}
             </div>
         </header>
         {% endif %}

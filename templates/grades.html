@@ -1,23 +1,30 @@
 {% extends 'base.html' %}
 
-{% block title %}Gradebook & ECTS Credits | SNS International University{% endblock %}
+{% block title %}Gradebook & ECTS Credits{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">Gradebook & ECTS Credit Evaluations</h1>
-        <p class="page-subtitle">Submit official STEM research assessments, letter grades, and European Credit Transfer (ECTS) credits</p>
+        {% if current_user.role == 'Student' %}
+            <h1 class="page-title">My Grade Transcript</h1>
+            <p class="page-subtitle">Your personal grade record and ECTS credit evaluations.</p>
+        {% else %}
+            <h1 class="page-title">Gradebook & ECTS Credit Evaluations</h1>
+            <p class="page-subtitle">Submit official STEM research assessments, letter grades, and European Credit Transfer (ECTS) credits</p>
+        {% endif %}
     </div>
 </div>
 
 <div style="display: grid; grid-template-columns: 360px 1fr; gap: 1.75rem;">
     <!-- Record Grade Form Card -->
+    {% if current_user.role != 'Student' %}
     <div class="card" style="height: fit-content; position: sticky; top: 95px;">
         <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--accent-cyan-light); display: flex; align-items: center; gap: 0.5rem;">
             📝 Issue Research Evaluation
         </h2>
 
         <form method="POST" action="{{ url_for('grades') }}">
+            {{ csrf_field() }}
             <div class="form-group">
                 <label class="form-label" for="student_id">Select Scholar</label>
                 <select id="student_id" name="student_id" class="form-control" required>
@@ -64,6 +71,13 @@
             </button>
         </form>
     </div>
+    {% else %}
+    <div class="card" style="margin-bottom: 1.5rem; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.2);">
+        <p style="margin: 0; color: var(--text-muted);">
+            Students can view their own grades here. Contact your department head for any corrections or inquiries.
+        </p>
+    </div>
+    {% endif %}
 
     <!-- Evaluation Records Table -->
     <div class="card">
@@ -87,6 +101,9 @@
                         <th>Marks %</th>
                         <th>Grade</th>
                         <th>Session Term</th>
+                        {% if current_user.role != 'Student' %}
+                        <th>Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -110,12 +127,27 @@
                         </td>
                         <td>
                             <span class="badge badge-grade">
-                                {{ grade.letter_grade }}
+                                {{ grade.display_letter_grade }}
                             </span>
                         </td>
                         <td style="color: var(--text-muted); font-size: 0.85rem;">
                             {{ grade.term }}
                         </td>
+                        {% if current_user.role != 'Student' %}
+                        <td>
+                            {% if can_manage_grade(grade) %}
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <a href="{{ url_for('edit_grade', grade_id=grade.id) }}" class="btn btn-secondary btn-sm" style="padding: 0.35rem 0.65rem;">Edit</a>
+                                <form method="POST" action="{{ url_for('delete_grade', grade_id=grade.id) }}" style="display: inline;">
+                                    {{ csrf_field() }}
+                                    <button type="submit" class="btn btn-danger btn-sm" style="padding: 0.35rem 0.65rem;" onclick="return confirm('Delete this grade record?');">Delete</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Restricted</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
                     </tr>
                     {% else %}
                     <tr>
@@ -144,13 +176,13 @@ function calculateGradePreview(val) {
     }
 
     let letter = 'F (0.0 GPA)';
-    if (score >= 95) letter = 'A+ (4.0 GPA)';
-    else if (score >= 90) letter = 'A (4.0 GPA)';
-    else if (score >= 87) letter = 'B+ (3.3 GPA)';
-    else if (score >= 83) letter = 'B (3.0 GPA)';
-    else if (score >= 80) letter = 'B- (2.7 GPA)';
-    else if (score >= 77) letter = 'C+ (2.3 GPA)';
-    else if (score >= 73) letter = 'C (2.0 GPA)';
+    if (score >= 90) letter = 'A+ (4.0 GPA)';
+    else if (score >= 80) letter = 'A (4.0 GPA)';
+    else if (score >= 70) letter = 'B+ (3.3 GPA)';
+    else if (score >= 60) letter = 'B (3.0 GPA)';
+    else if (score >= 50) letter = 'C+ (2.7 GPA)';
+    else if (score >= 40) letter = 'C (2.3 GPA)';
+    else if (score >= 30) letter = 'D (Fail)';
 
     letterSpan.textContent = letter;
     container.style.display = 'block';

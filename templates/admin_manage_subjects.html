@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage SNS College Subjects{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Manage Research Modules</h1>
+        <p class="page-subtitle">Maintain SNS College independent institute modules, faculty assignments, and department details.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin_create_subject') }}" class="btn btn-primary">+ Create Research Module</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Faculty</th>
+                    <th>Level</th>
+                    <th>Credits</th>
+                    <th>Teacher</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject.code }}</td>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.faculty or 'General' }}</td>
+                    <td>{{ subject.level or 'Bachelor' }}</td>
+                    <td>{{ subject.credits }}</td>
+                    <td>{{ subject.assigned_teacher.full_name if subject.assigned_teacher else 'Not assigned' }}</td>
+                    <td style="text-align: right;">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap;">
+                            <a href="{{ url_for('admin_edit_subject', subject_id=subject.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                            <form method="POST" action="{{ url_for('admin_delete_subject', subject_id=subject.id) }}" style="display: inline;" onsubmit="return confirm('Delete this subject?');">
+                                {{ csrf_field() }}
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No subjects are configured yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

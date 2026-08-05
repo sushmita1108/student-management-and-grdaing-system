@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Enroll Scholar | SNS International University{% endblock %}
+{% block title %}Enroll Scholar{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
         <h1 class="page-title">Enroll New Scholar</h1>
-        <p class="page-subtitle">Register a research candidate into the SNS international academic database</p>
+        <p class="page-subtitle">Register a research candidate into the SNS college academic database</p>
     </div>
     <div>
         <a href="{{ url_for('students') }}" class="btn btn-secondary">&larr; Back to Directory</a>
@@ -20,6 +20,7 @@
         </h2>
 
         <form method="POST" action="{{ url_for('add_student') }}">
+            {{ csrf_field() }}
             <div class="form-group">
                 <label class="form-label" for="student_code">Scholar Registration ID / Code</label>
                 <div style="display: flex; gap: 0.5rem;">
@@ -40,20 +41,39 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="email">University Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. alexander.wright@sns.edu" required>
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. aarav.sharma@sns.edu.np" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="grade_level">Degree Program / Academic Track</label>
                 <select id="grade_level" name="grade_level" class="form-control" required>
-                    <option value="" disabled selected>-- Select SNS Degree Track --</option>
-                    <option value="B.Sc. Artificial Intelligence & Neural Nets">B.Sc. Artificial Intelligence & Neural Nets</option>
-                    <option value="B.Sc. Aerospace & Hypersonic Engineering">B.Sc. Aerospace & Hypersonic Engineering</option>
-                    <option value="M.Sc. Quantitative Finance & Algorithmic Trading">M.Sc. Quantitative Finance & Algorithmic Trading</option>
-                    <option value="M.Sc. Autonomous Systems & Robotics">M.Sc. Autonomous Systems & Robotics</option>
-                    <option value="Ph.D. Quantum Artificial Intelligence">Ph.D. Quantum Artificial Intelligence</option>
-                    <option value="Ph.D. CRISPR Synthetic Biology">Ph.D. CRISPR Synthetic Biology</option>
+                    <option value="" disabled selected>-- Select Academic Track --</option>
+                    <option value="+2 Science">+2 Science</option>
+                    <option value="+2 Management">+2 Management</option>
+                    <option value="B.Sc. CSIT">B.Sc. CSIT</option>
+                    <option value="BCA - Bachelor of Computer Application">BCA - Bachelor of Computer Application</option>
+                    <option value="BBA - Bachelor of Business Administration">BBA - Bachelor of Business Administration</option>
+                    <option value="M.Sc. Data Science">M.Sc. Data Science</option>
+                    <option value="M.Sc. Business Analytics">M.Sc. Business Analytics</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="faculty">Faculty</label>
+                <select id="faculty" name="faculty" class="form-control" required onchange="updateAcademicPeriodOptions()">
+                    <option value="" disabled selected>-- Select Faculty --</option>
+                    <option value="Science & Technology">Science & Technology</option>
+                    <option value="Management">Management</option>
+                    <option value="Humanities">Humanities</option>
+                    <option value="General">General</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="academic_period">Academic Period</label>
+                <select id="academic_period" name="academic_period" class="form-control" required>
+                    <option value="" disabled selected>-- Select Academic Period --</option>
                 </select>
             </div>
 
@@ -83,5 +103,24 @@ function generateScholarId() {
     const randomNum = Math.floor(90000 + Math.random() * 9999);
     document.getElementById('student_code').value = 'SNS-' + randomNum;
 }
+function updateAcademicPeriodOptions() {
+    const faculty = document.getElementById('faculty').value;
+    const periodSelect = document.getElementById('academic_period');
+    const engineeringPeriods = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'];
+    const yearPeriods = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
+    const options = faculty === 'Engineering' ? engineeringPeriods : yearPeriods;
+
+    periodSelect.innerHTML = '<option value="" disabled selected>-- Select Academic Period --</option>';
+    options.forEach(period => {
+        const option = document.createElement('option');
+        option.value = period;
+        option.textContent = period;
+        periodSelect.appendChild(option);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateAcademicPeriodOptions();
+});
 </script>
 {% endblock %}

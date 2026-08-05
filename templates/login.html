@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Sign In | SNS International University{% endblock %}
+{% block title %}Sign In | SNS College{% endblock %}
 
 {% block content %}
 <div style="min-height: calc(100vh - 160px); display: flex; align-items: center; justify-content: center;">
     <div style="width: 100%; max-width: 450px;">
-        <!-- SNS University Crest Badge Header -->
+        <!-- SNS College Crest Badge Header -->
         <div style="text-align: center; margin-bottom: 2rem;">
             <div style="width: 68px; height: 68px; background: linear-gradient(135deg, #06b6d4, #2563eb); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.6rem; font-family: 'Outfit', sans-serif; box-shadow: 0 8px 32px rgba(6, 182, 212, 0.45); margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.25);">
                 SNS
             </div>
-            <h1 style="font-size: 1.85rem; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(135deg, #ffffff, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                SNS UNIVERSITY
+            <h1 style="font-size: 1.85rem; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(135deg, #ffffff, #67e8f9); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                SNS COLLEGE
             </h1>
             <p style="color: var(--accent-gold); font-size: 0.825rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">
-                Global Institute of Tech & Advanced Sciences
+                College Email Access for all Roles
             </p>
             <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.35rem;">
-                Faculty & Provost Academic Portal Access
+                Students and staff can register first, then sign in with their SNS College email ending in @sns.edu.np or their username.
             </p>
         </div>
 
@@ -27,20 +27,50 @@
                 <div style="font-size: 0.78rem; font-weight: 800; color: var(--accent-cyan-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
                     ⚡ Demo Quick Sign In:
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('admin@sns.edu', 'admin123')" style="font-size: 0.78rem;">
-                        👤 Provost (Admin)
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('admin@sns.edu.np', 'admin123')" style="font-size: 0.78rem;">
+                        👤 Campus Admin
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('teacher@sns.edu', 'teacher123')" style="font-size: 0.78rem;">
-                        🎓 Faculty (Teacher)
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('department@sns.edu.np', 'dept123')" style="font-size: 0.78rem;">
+                        🏛️ Department Head
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('teacher@sns.edu.np', 'teacher123')" style="font-size: 0.78rem;">
+                        🎓 Lecturer
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('student@sns.edu.np', 'student123')" style="font-size: 0.78rem;">
+                        🎒 Student
                     </button>
                 </div>
             </div>
 
             <form method="POST" action="{{ url_for('login') }}">
-                <div class="form-group">
-                    <label class="form-label" for="login_input">University Email or Username</label>
-                    <input type="text" id="login_input" name="login_input" class="form-control" placeholder="e.g. admin@sns.edu or admin" required>
+                {{ csrf_field() }}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="login_input">College Email or Username</label>
+                        <input type="text" id="login_input" name="login_input" class="form-control" placeholder="e.g. student@sns.edu.np" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="role">Select Role</label>
+                        <select id="role" name="role" class="form-control" required onchange="toggleDepartmentField()">
+                            <option value="Student" selected>Student</option>
+                            <option value="Teacher">Lecturer / Faculty</option>
+                            <option value="Department">Department Head</option>
+                            <option value="Admin">Campus Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" id="department-field" style="display: none;">
+                    <label class="form-label" for="department">Department</label>
+                    <select id="department" name="department" class="form-control">
+                        <option value="" selected>Choose Department</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Medicine">Medicine</option>
+                        <option value="Management">Management</option>
+                        <option value="Science">Science</option>
+                        <option value="Humanities">Humanities</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -60,7 +90,7 @@
             </form>
 
             <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-glass); font-size: 0.875rem; color: var(--text-muted);">
-                New faculty staff? <a href="{{ url_for('register') }}" style="color: var(--accent-cyan-light); font-weight: 700; text-decoration: none;">Create Faculty Account</a>
+                New student or staff? <a href="{{ url_for('register') }}" style="color: var(--accent-cyan-light); font-weight: 700; text-decoration: none;">Create an SNS College account</a>
             </div>
         </div>
     </div>
@@ -73,5 +103,22 @@ function fillCredentials(email, pass) {
     document.getElementById('login_input').value = email;
     document.getElementById('password').value = pass;
 }
+function toggleDepartmentField() {
+    const roleSelect = document.getElementById('role');
+    const departmentBlock = document.getElementById('department-field');
+    const departmentSelect = document.getElementById('department');
+    if (roleSelect.value === 'Department') {
+        departmentBlock.style.display = 'block';
+        departmentSelect.setAttribute('required', 'required');
+    } else {
+        departmentBlock.style.display = 'none';
+        departmentSelect.removeAttribute('required');
+        departmentSelect.value = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    toggleDepartmentField();
+});
 </script>
 {% endblock %}

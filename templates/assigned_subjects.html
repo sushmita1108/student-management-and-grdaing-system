@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Assigned Subjects | SNS College{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Assigned Subjects</h1>
+        <p class="page-subtitle">Review the courses currently assigned to your teaching profile.</p>
+    </div>
+</div>
+
+<div class="card" style="padding: 1.5rem;">
+    {% if subjects %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Faculty</th>
+                    <th>Level</th>
+                    <th>Credits</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject.code }}</td>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.faculty }}</td>
+                    <td>{{ subject.level }}</td>
+                    <td>{{ subject.credits }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        No subjects are currently assigned to your teacher profile.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

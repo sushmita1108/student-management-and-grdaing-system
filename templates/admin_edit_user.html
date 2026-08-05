@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if user else 'Create' }} SNS College User{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ 'Edit' if user else 'Create' }} User Account</h1>
+        <p class="page-subtitle">Manage faculty and student account details for the SNS College portal.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin_manage_users') }}" class="btn btn-secondary">&larr; Back to Accounts</a>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('admin_edit_user', user_id=user.id) if user else url_for('admin_create_user') }}">
+        {{ csrf_field() }}
+        <div class="form-group">
+            <label class="form-label" for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" class="form-control" value="{{ user.full_name if user else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input type="text" id="username" name="username" class="form-control" value="{{ user.username if user else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="email">SNS College Email</label>
+            <input type="email" id="email" name="email" class="form-control" value="{{ user.email if user else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="role">Role</label>
+            <select id="role" name="role" class="form-control" required>
+                {% for choice in ROLE_CHOICES %}
+                <option value="{{ choice }}" {% if user and user.role == choice %}selected{% endif %}>{{ choice }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="department">Department</label>
+            <input type="text" id="department" name="department" class="form-control" value="{{ user.department if user else '' }}" placeholder="e.g. Engineering, Medicine, Management, Science, Humanities">
+            <small style="color: var(--text-muted);">Only Department and Teacher roles require a department. Students may leave this blank.</small>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" {% if not user %}required{% endif %}>
+            <small style="color: var(--text-muted);">{% if user %}Leave blank to keep the current password.{% else %}Create a password for the account.{% endif %}</small>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+            <a href="{{ url_for('admin_manage_users') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{{ 'Update' if user else 'Create' }} Account</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
