@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Enroll Scholar | SNS International University{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Enroll New Scholar</h1>
+        <p class="page-subtitle">Register a research candidate into the SNS international academic database</p>
+    </div>
+    <div>
+        <a href="{{ url_for('students') }}" class="btn btn-secondary">&larr; Back to Directory</a>
+    </div>
+</div>
+
+<div style="max-width: 680px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--accent-cyan-light); display: flex; align-items: center; gap: 0.5rem;">
+            🎓 Academic Registration Form
+        </h2>
+
+        <form method="POST" action="{{ url_for('add_student') }}">
+            <div class="form-group">
+                <label class="form-label" for="student_code">Scholar Registration ID / Code</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="student_code" name="student_code" class="form-control" placeholder="e.g. SNS-90108" required style="font-family: monospace;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="generateScholarId()" style="white-space: nowrap;">⚡ Auto Gen</button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control" placeholder="e.g. Alexander" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control" placeholder="e.g. Wright" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">University Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. alexander.wright@sns.edu" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="grade_level">Degree Program / Academic Track</label>
+                <select id="grade_level" name="grade_level" class="form-control" required>
+                    <option value="" disabled selected>-- Select SNS Degree Track --</option>
+                    <option value="B.Sc. Artificial Intelligence & Neural Nets">B.Sc. Artificial Intelligence & Neural Nets</option>
+                    <option value="B.Sc. Aerospace & Hypersonic Engineering">B.Sc. Aerospace & Hypersonic Engineering</option>
+                    <option value="M.Sc. Quantitative Finance & Algorithmic Trading">M.Sc. Quantitative Finance & Algorithmic Trading</option>
+                    <option value="M.Sc. Autonomous Systems & Robotics">M.Sc. Autonomous Systems & Robotics</option>
+                    <option value="Ph.D. Quantum Artificial Intelligence">Ph.D. Quantum Artificial Intelligence</option>
+                    <option value="Ph.D. CRISPR Synthetic Biology">Ph.D. CRISPR Synthetic Biology</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="status">Enrollment & Honors Distinction</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="Active (Dean's Honor List)" selected>Active (Dean's Honor List)</option>
+                    <option value="Active (Summa Cum Laude)">Active (Summa Cum Laude)</option>
+                    <option value="Active (Magna Cum Laude)">Active (Magna Cum Laude)</option>
+                    <option value="Active (Presidential Scholar)">Active (Presidential Scholar)</option>
+                    <option value="On Research Leave">On International Research Exchange</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <a href="{{ url_for('students') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Submit Scholar Enrollment &rarr;</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function generateScholarId() {
+    const randomNum = Math.floor(90000 + Math.random() * 9999);
+    document.getElementById('student_code').value = 'SNS-' + randomNum;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Gradebook & ECTS Credits | SNS International University{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Gradebook & ECTS Credit Evaluations</h1>
+        <p class="page-subtitle">Submit official STEM research assessments, letter grades, and European Credit Transfer (ECTS) credits</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 360px 1fr; gap: 1.75rem;">
+    <!-- Record Grade Form Card -->
+    <div class="card" style="height: fit-content; position: sticky; top: 95px;">
+        <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--accent-cyan-light); display: flex; align-items: center; gap: 0.5rem;">
+            📝 Issue Research Evaluation
+        </h2>
+
+        <form method="POST" action="{{ url_for('grades') }}">
+            <div class="form-group">
+                <label class="form-label" for="student_id">Select Scholar</label>
+                <select id="student_id" name="student_id" class="form-control" required>
+                    <option value="" disabled selected>-- Choose Candidate --</option>
+                    {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.full_name }} ({{ student.student_code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="subject_id">Research Module / Subject</label>
+                <select id="subject_id" name="subject_id" class="form-control" required>
+                    <option value="" disabled selected>-- Choose STEM Module --</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.code }} - {{ subject.name }} ({{ subject.credits }} ECTS)</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="score">Marks Percentage (0.0 - 100.0)</label>
+                <input type="number" step="0.1" min="0" max="100" id="score" name="score" class="form-control" placeholder="e.g. 96.5" required oninput="calculateGradePreview(this.value)">
+                
+                <div id="gradePreview" style="margin-top: 0.75rem; display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(10, 16, 32, 0.9); border: 1px solid var(--border-cyan); border-radius: var(--radius-sm); font-size: 0.85rem;">
+                        <span>Grade & GPA Points:</span>
+                        <span id="previewLetter" class="badge badge-grade">A+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="term">Academic Term Session</label>
+                <select id="term" name="term" class="form-control">
+                    <option value="Fall Semester 2026" selected>Fall Semester 2026</option>
+                    <option value="Spring Semester 2027">Spring Semester 2027</option>
+                    <option value="Summer Research 2027">Summer Research 2027</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                + Save Grade & Award Credits
+            </button>
+        </form>
+    </div>
+
+    <!-- Evaluation Records Table -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+                <h3 style="font-weight: 800; font-size: 1.2rem;">Official Evaluation Transcripts</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Historical marks recorded across SNS research labs</p>
+            </div>
+            <span class="badge badge-active" style="font-size: 0.8rem;">
+                Total Evaluations: {{ grades|length }}
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Scholar Name</th>
+                        <th>Research Module</th>
+                        <th>Credits</th>
+                        <th>Marks %</th>
+                        <th>Grade</th>
+                        <th>Session Term</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: #ffffff;">{{ grade.student.full_name }}</div>
+                            <div style="font-size: 0.78rem; color: var(--accent-cyan-light); font-family: monospace;">{{ grade.student.student_code }}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;">{{ grade.subject.name }}</div>
+                            <div style="font-size: 0.78rem; color: var(--accent-cyan-light); font-family: monospace;">{{ grade.subject.code }}</div>
+                        </td>
+                        <td>
+                            <span class="badge" style="background: rgba(255,255,255,0.06); color: var(--text-main);">
+                                {{ grade.subject.credits }} ECTS
+                            </span>
+                        </td>
+                        <td style="font-weight: 800; color: #f8fafc;">
+                            {{ "%.1f"|format(grade.score) }}%
+                        </td>
+                        <td>
+                            <span class="badge badge-grade">
+                                {{ grade.letter_grade }}
+                            </span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">
+                            {{ grade.term }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                            No course grade evaluations recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calculateGradePreview(val) {
+    const score = parseFloat(val);
+    const container = document.getElementById('gradePreview');
+    const letterSpan = document.getElementById('previewLetter');
+
+    if (isNaN(score)) {
+        container.style.display = 'none';
+        return;
+    }
+
+    let letter = 'F (0.0 GPA)';
+    if (score >= 95) letter = 'A+ (4.0 GPA)';
+    else if (score >= 90) letter = 'A (4.0 GPA)';
+    else if (score >= 87) letter = 'B+ (3.3 GPA)';
+    else if (score >= 83) letter = 'B (3.0 GPA)';
+    else if (score >= 80) letter = 'B- (2.7 GPA)';
+    else if (score >= 77) letter = 'C+ (2.3 GPA)';
+    else if (score >= 73) letter = 'C (2.0 GPA)';
+
+    letterSpan.textContent = letter;
+    container.style.display = 'block';
+}
+</script>
+{% endblock %}

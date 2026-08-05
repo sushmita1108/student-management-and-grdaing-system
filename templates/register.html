@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Registration | SNS International University{% endblock %}
+
+{% block content %}
+<div style="min-height: calc(100vh - 160px); display: flex; align-items: center; justify-content: center; padding: 1.5rem 0;">
+    <div style="width: 100%; max-width: 480px;">
+        <!-- SNS University Crest Header -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="width: 68px; height: 68px; background: linear-gradient(135deg, #06b6d4, #2563eb); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.6rem; font-family: 'Outfit', sans-serif; box-shadow: 0 8px 32px rgba(6, 182, 212, 0.45); margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.25);">
+                SNS
+            </div>
+            <h1 style="font-size: 1.85rem; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(135deg, #ffffff, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                SNS UNIVERSITY
+            </h1>
+            <p style="color: var(--accent-gold); font-size: 0.825rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">
+                Global Institute of Tech & Advanced Sciences
+            </p>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.35rem;">
+                New Faculty & Administrative Staff Registration
+            </p>
+        </div>
+
+        <div class="card" style="padding: 2.25rem; border-color: rgba(6, 182, 212, 0.35);">
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="form-group">
+                    <label class="form-label" for="full_name">Full Name & Academic Title</label>
+                    <input type="text" id="full_name" name="full_name" class="form-control" placeholder="e.g. Prof. Alistair Vance, Chair of Robotics" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="e.g. avance" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="role">Staff Role</label>
+                        <select id="role" name="role" class="form-control">
+                            <option value="Teacher" selected>Faculty Chair</option>
+                            <option value="Admin">Department Provost / Dean</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">University Email</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="e.g. alistair.vance@sns.edu" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 0.5rem;">
+                    Create Faculty Account &rarr;
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-glass); font-size: 0.875rem; color: var(--text-muted);">
+                Already have a faculty account? <a href="{{ url_for('login') }}" style="color: var(--accent-cyan-light); font-weight: 700; text-decoration: none;">Sign In</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
