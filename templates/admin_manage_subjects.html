@@ -5,11 +5,11 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">Manage Research Modules</h1>
-        <p class="page-subtitle">Maintain SNS College independent institute modules, faculty assignments, and department details.</p>
+        <h1 class="page-title">Subjects Assigned</h1>
+        <p class="page-subtitle">Manage SNS College subjects assigned to department faculties, semesters/years, and teachers.</p>
     </div>
     <div>
-        <a href="{{ url_for('admin_create_subject') }}" class="btn btn-primary">+ Create Research Module</a>
+        <a href="{{ url_for('admin_create_subject') }}" class="btn btn-primary">+ Create Subject</a>
     </div>
 </div>
 
@@ -20,8 +20,9 @@
                 <tr>
                     <th>Code</th>
                     <th>Name</th>
+                    <th>Department</th>
+                    <th>Semester / Year</th>
                     <th>Faculty</th>
-                    <th>Level</th>
                     <th>Credits</th>
                     <th>Teacher</th>
                     <th style="text-align: right;">Actions</th>
@@ -32,8 +33,9 @@
                 <tr>
                     <td>{{ subject.code }}</td>
                     <td>{{ subject.name }}</td>
+                    <td><span class="badge" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan-light);">{{ subject.department or 'Engineering' }}</span></td>
+                    <td><span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fde68a;">{{ subject.academic_period or 'Semester 1' }}</span></td>
                     <td>{{ subject.faculty or 'General' }}</td>
-                    <td>{{ subject.level or 'Bachelor' }}</td>
                     <td>{{ subject.credits }}</td>
                     <td>{{ subject.assigned_teacher.full_name if subject.assigned_teacher else 'Not assigned' }}</td>
                     <td style="text-align: right;">
@@ -48,7 +50,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No subjects are configured yet.</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No subjects are configured yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>

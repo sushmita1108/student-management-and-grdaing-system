@@ -42,8 +42,14 @@
 
         <div class="form-group">
             <label class="form-label" for="department">Department</label>
-            <input type="text" id="department" name="department" class="form-control" value="{{ user.department if user else '' }}" placeholder="e.g. Engineering, Medicine, Management, Science, Humanities">
-            <small style="color: var(--text-muted);">Only Department and Teacher roles require a department. Students may leave this blank.</small>
+            <select id="department" name="department" class="form-control">
+                {% set dept_val = user.department if user else '' %}
+                <option value="General" {% if not dept_val or dept_val == 'General' %}selected{% endif %}>General</option>
+                <option value="Engineering" {% if dept_val == 'Engineering' %}selected{% endif %}>Engineering</option>
+                <option value="Medicine" {% if dept_val == 'Medicine' %}selected{% endif %}>Medicine</option>
+                <option value="Management" {% if dept_val == 'Management' %}selected{% endif %}>Management</option>
+                <option value="Science and Humanities" {% if dept_val == 'Science and Humanities' %}selected{% endif %}>Science and Humanities</option>
+            </select>
         </div>
 
         <div class="form-group">

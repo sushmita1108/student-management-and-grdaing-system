@@ -39,10 +39,10 @@
                     <th>Scholar Code</th>
                     <th>Full Name</th>
                     <th>College Email</th>
-                    <th>Degree / Research Track</th>
+                    <th>Department (Grade Level)</th>
                     <th>Academic Period</th>
                     <th>Calculated GPA</th>
-                    <th>Enrollment & Honors Status</th>
+                    <th>Academic Status</th>
                     <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
@@ -62,7 +62,7 @@
                     </td>
                     <td>
                         <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3);">
-                            {{ student.grade_level }}
+                            {{ student.department or student.grade_level }}
                         </span>
                     </td>
                     <td>
@@ -76,13 +76,13 @@
                         </span>
                     </td>
                     <td>
-                        {% if 'Summa' in student.status or 'Magna' in student.status or 'Dean' in student.status or 'Presidential' in student.status %}
+                        {% if student.status == 'Graduated' %}
                             <span class="badge badge-honors">
-                                ⭐ {{ student.status }}
+                                🎓 Graduated
                             </span>
                         {% else %}
                             <span class="badge badge-active">
-                                ● {{ student.status }}
+                                ● Undergraduated
                             </span>
                         {% endif %}
                     </td>
@@ -93,7 +93,6 @@
                             </a>
                             <form method="POST" action="{{ url_for('delete_student', id=student.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to withdraw this scholar from the directory?');">
                                 {{ csrf_field() }}
-                                {{ csrf_field() }}
                                 <button type="submit" class="btn btn-danger btn-sm">
                                     🗑️ Delete
                                 </button>
@@ -103,7 +102,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
                         No scholar records registered in the college directory.
                     </td>
                 </tr>

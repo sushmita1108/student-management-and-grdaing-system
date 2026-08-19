@@ -25,20 +25,26 @@
             <!-- 1-Click Quick Fill Helper Pill Buttons -->
             <div style="background: rgba(10, 16, 32, 0.85); border: 1px solid var(--border-cyan); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
                 <div style="font-size: 0.78rem; font-weight: 800; color: var(--accent-cyan-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
-                    ⚡ Demo Quick Sign In:
+                    ⚡ Quick Demo Sign In:
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('admin@sns.edu.np', 'admin123')" style="font-size: 0.78rem;">
-                        👤 Campus Admin
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('admin@sns.edu.np', 'admin123', 'Admin', '')" style="font-size: 0.75rem;">
+                        👤 Admin (Er. Sushmita)
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('department@sns.edu.np', 'dept123')" style="font-size: 0.78rem;">
-                        🏛️ Department Head
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_eng@sns.edu.np', 'dept123', 'Department', 'Engineering')" style="font-size: 0.75rem;">
+                        🏛️ Head: Engineering
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('teacher@sns.edu.np', 'teacher123')" style="font-size: 0.78rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_med@sns.edu.np', 'dept123', 'Department', 'Medicine')" style="font-size: 0.75rem;">
+                        ⚕️ Head: Medicine
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_mgmt@sns.edu.np', 'dept123', 'Department', 'Management')" style="font-size: 0.75rem;">
+                        💼 Head: Management
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_sh@sns.edu.np', 'dept123', 'Department', 'Science and Humanities')" style="font-size: 0.75rem;">
+                        🔬 Head: Sci & Hum
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('teacher@sns.edu.np', 'teacher123', 'Teacher', '')" style="font-size: 0.75rem;">
                         🎓 Lecturer
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('student@sns.edu.np', 'student123')" style="font-size: 0.78rem;">
-                        🎒 Student
                     </button>
                 </div>
             </div>
@@ -48,15 +54,15 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label" for="login_input">College Email or Username</label>
-                        <input type="text" id="login_input" name="login_input" class="form-control" placeholder="e.g. student@sns.edu.np" required>
+                        <input type="text" id="login_input" name="login_input" class="form-control" placeholder="e.g. admin@sns.edu.np" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="role">Select Role</label>
                         <select id="role" name="role" class="form-control" required onchange="toggleDepartmentField()">
-                            <option value="Student" selected>Student</option>
+                            <option value="Student">Student</option>
                             <option value="Teacher">Lecturer / Faculty</option>
                             <option value="Department">Department Head</option>
-                            <option value="Admin">Campus Admin</option>
+                            <option value="Admin" selected>Campus Admin</option>
                         </select>
                     </div>
                 </div>
@@ -68,8 +74,7 @@
                         <option value="Engineering">Engineering</option>
                         <option value="Medicine">Medicine</option>
                         <option value="Management">Management</option>
-                        <option value="Science">Science</option>
-                        <option value="Humanities">Humanities</option>
+                        <option value="Science and Humanities">Science and Humanities</option>
                     </select>
                 </div>
 
@@ -99,9 +104,16 @@
 
 {% block extra_js %}
 <script>
-function fillCredentials(email, pass) {
+function fillCredentials(email, pass, role, dept) {
     document.getElementById('login_input').value = email;
     document.getElementById('password').value = pass;
+    if (role) {
+        document.getElementById('role').value = role;
+        toggleDepartmentField();
+    }
+    if (dept) {
+        document.getElementById('department').value = dept;
+    }
 }
 function toggleDepartmentField() {
     const roleSelect = document.getElementById('role');

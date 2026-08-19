@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+
+{% block title %}SNS College | Official Website & Academic Portal{% endblock %}
+
+{% block content %}
+<!-- Public Header Navigation Bar for SNS College -->
+<nav
+    style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div
+            style="width: 45px; height: 45px; background: linear-gradient(135deg, #06b6d4, #3b82f6); border-radius: 12px; display: flex; align-items: center; justify-content: justify; justify-content: center; font-weight: 900; font-size: 1.3rem; color: #ffffff; font-family: 'Outfit', sans-serif; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);">
+            SNS
+        </div>
+        <div>
+            <div
+                style="font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 900; letter-spacing: 0.5px; background: linear-gradient(135deg, #ffffff, #67e8f9); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                SNS COLLEGE
+            </div>
+            <div
+                style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700;">
+                Higher Education & Research Institution
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1.75rem; font-size: 0.925rem; font-weight: 600;">
+        <a href="#about" style="color: var(--text-main); text-decoration: none; transition: color 0.2s;"
+            onmouseover="this.style.color='#67e8f9'" onmouseout="this.style.color='var(--text-main)'">About SNS</a>
+        <a href="#departments" style="color: var(--text-main); text-decoration: none; transition: color 0.2s;"
+            onmouseover="this.style.color='#67e8f9'" onmouseout="this.style.color='var(--text-main)'">Departments</a>
+        <a href="#programs" style="color: var(--text-main); text-decoration: none; transition: color 0.2s;"
+            onmouseover="this.style.color='#67e8f9'" onmouseout="this.style.color='var(--text-main)'">Programs</a>
+        <a href="#portal" style="color: var(--text-main); text-decoration: none; transition: color 0.2s;"
+            onmouseover="this.style.color='#67e8f9'" onmouseout="this.style.color='var(--text-main)'">Academic
+            Portal</a>
+    </div>
+
+    <div style="display: flex; gap: 0.85rem; align-items: center;">
+        {% if current_user %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary"
+            style="box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);">
+            📊 Go to Dashboard →
+        </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-primary" style="box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);">
+            🔐 Sign In to Portal →
+        </a>
+        <a href="{{ url_for('register') }}" class="btn btn-secondary">
+            📝 Register
+        </a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Official SNS College Hero Banner -->
+<section
+    style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.22), rgba(139, 92, 246, 0.18), rgba(245, 158, 11, 0.15)); border: 1px solid rgba(103, 232, 249, 0.4); padding: 3.5rem 2.5rem; border-radius: var(--radius-lg); margin-bottom: 3rem; position: relative; overflow: hidden; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);">
+    <div
+        style="position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(0,0,0,0) 70%); pointer-events: none;">
+    </div>
+    <div
+        style="position: absolute; bottom: -60px; left: 20%; width: 250px; height: 250px; background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(0,0,0,0) 70%); pointer-events: none;">
+    </div>
+
+    <div style="max-width: 860px; position: relative; z-index: 2;">
+        <div
+            style="display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.9rem; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); border-radius: 30px; color: var(--accent-cyan-light); font-size: 0.85rem; font-weight: 700; margin-bottom: 1.25rem;">
+            <span>🎓 Official Website of SNS College</span>
+            <span>•</span>
+            <span style="color: #6ee7b7;">Kathmandu • Pokhara • Lalitpur</span>
+        </div>
+
+        <h1
+            style="font-family: 'Outfit', sans-serif; font-size: 3.25rem; font-weight: 900; line-height: 1.15; margin-bottom: 1.25rem; background: linear-gradient(135deg, #ffffff 0%, #67e8f9 50%, #fde68a 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Empowering Minds, Shaping Tomorrow at SNS College
+        </h1>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem;">
+            SNS College is a premier institution dedicated to academic rigor, scientific innovation, and student
+            success. Offering comprehensive undergraduate and graduate degree programs in <strong
+                style="color: #ffffff;">Engineering</strong>, <strong style="color: #ffffff;">Medicine</strong>, <strong
+                style="color: #ffffff;">Management</strong>, and <strong style="color: #ffffff;">Science and
+                Humanities</strong>.
+        </p>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="#departments" class="btn btn-primary btn-lg"
+                style="padding: 0.9rem 1.8rem; font-size: 1rem; box-shadow: 0 6px 25px rgba(6, 182, 212, 0.45);">
+                🏛️ Explore Departments & Programs
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-gold btn-lg"
+                style="padding: 0.9rem 1.8rem; font-size: 1rem; box-shadow: 0 6px 25px rgba(245, 158, 11, 0.35);">
+                🔐 Student & Faculty Portal Sign In
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- College Key Stats Grid -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem;">
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.75rem; border: 1px solid rgba(6, 182, 212, 0.35); text-align: center;">
+        <div
+            style="font-size: 3rem; font-weight: 900; color: var(--accent-cyan-light); font-family: 'Outfit', sans-serif;">
+            4</div>
+        <div style="font-weight: 800; color: #ffffff; margin-top: 0.25rem;">Academic Departments</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Engineering, Medicine, Mgmt, Sci &
+            Hum</div>
+    </div>
+
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.75rem; border: 1px solid rgba(192, 132, 252, 0.35); text-align: center;">
+        <div style="font-size: 3rem; font-weight: 900; color: #c084fc; font-family: 'Outfit', sans-serif;">25+</div>
+        <div style="font-weight: 800; color: #ffffff; margin-top: 0.25rem;">Degree Programs</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Undergraduate & Master Levels
+        </div>
+    </div>
+
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.75rem; border: 1px solid rgba(245, 158, 11, 0.35); text-align: center;">
+        <div
+            style="font-size: 3rem; font-weight: 900; color: var(--accent-gold-light); font-family: 'Outfit', sans-serif;">
+            4.0 GPA</div>
+        <div style="font-weight: 800; color: #ffffff; margin-top: 0.25rem;">Grading System</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Standard Semester & Annual
+            Evaluations</div>
+    </div>
+
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.75rem; border: 1px solid rgba(52, 211, 153, 0.35); text-align: center;">
+        <div style="font-size: 3rem; font-weight: 900; color: #34d399; font-family: 'Outfit', sans-serif;">98%</div>
+        <div style="font-weight: 800; color: #ffffff; margin-top: 0.25rem;">Graduation Rate</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Graduated Scholars & Alumni
+            Success</div>
+    </div>
+</div>
+
+<!-- About SNS College Section -->
+<section id="about" style="margin-bottom: 3.5rem;">
+    <div class="card"
+        style="padding: 2.25rem; border: 1px solid rgba(6, 182, 212, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(10, 16, 32, 0.98));">
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: center;">
+            <div>
+                <span class="badge"
+                    style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan-light); border: 1px solid rgba(6, 182, 212, 0.35); margin-bottom: 0.75rem;">
+                    🏛️ Institutional Overview
+                </span>
+                <h2 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">
+                    About SNS College
+                </h2>
+                <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.7; margin-bottom: 1rem;">
+                    SNS College stands as a beacon of academic excellence in Nepal. Under the leadership of Campus Admin
+                    <strong style="color: #67e8f9;">Er. Sushmita Marasini</strong> and our dedicated Department Deans,
+                    the college provides cutting-edge laboratory infrastructure, comprehensive curriculum frameworks,
+                    and transparent grading standards.
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7;">
+                    Our faculties ensure that every student receives individualized academic mentorship, research
+                    opportunities, and practical training across Kathmandu, Pokhara, and Lalitpur campuses.
+                </p>
+            </div>
+
+            <div
+                style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); padding: 1.75rem; border-radius: 18px; text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👩‍💼</div>
+                <div style="font-weight: 800; color: #ffffff; font-size: 1.1rem;">Er. Sushmita Marasini</div>
+                <div style="font-size: 0.85rem; color: var(--accent-cyan-light); margin-top: 0.25rem;">Campus
+                    Administration Head</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem; line-height: 1.5;">
+                    "Fostering academic integrity, innovation, and educational leadership at SNS College."
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Academic Departments & Programs Section -->
+<section id="departments" style="margin-bottom: 3.5rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="badge"
+            style="background: rgba(245, 158, 11, 0.15); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); margin-bottom: 0.5rem;">
+            📚 Academic Programs
+        </span>
+        <h2 style="font-size: 2.25rem; font-weight: 800; color: #ffffff;">
+            SNS College Academic Departments
+        </h2>
+        <p style="color: var(--text-muted); max-width: 620px; margin: 0.5rem auto 0 auto; font-size: 0.95rem;">
+            Explore our four specialized constituent departments led by distinguished faculty chairs.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.75rem;">
+        <!-- Department 1: Engineering -->
+        <div class="card card-hover"
+            style="margin: 0; padding: 2rem; border: 1px solid rgba(6, 182, 212, 0.35); background: rgba(15, 23, 42, 0.85);">
+            <div
+                style="width: 50px; height: 50px; border-radius: 14px; background: rgba(6, 182, 212, 0.18); border: 1px solid rgba(6, 182, 212, 0.4); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan-light); font-size: 1.5rem; margin-bottom: 1.25rem;">
+                ⚙️
+            </div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
+                Department of Engineering
+            </h3>
+            <div style="font-size: 0.85rem; color: var(--accent-cyan-light); font-weight: 700; margin-bottom: 0.75rem;">
+                Institute of Engineering (IOE)
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem;">
+                Department Chair: <strong>Er. Subash Rajkarnikar</strong><br>
+                Advanced education in software, artificial intelligence, civil, electrical, and systems engineering.
+            </p>
+            <ul
+                style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
+                <li>✓ B.E. Computer Engineering</li>
+                <li>✓ B.E. Civil Engineering</li>
+                <li>✓ B.E. Electrical Engineering</li>
+                <li>✓ B.E. Mechanical Engineering</li>
+                <li>✓ B.E. Electronics & Communication</li>
+            </ul>
+        </div>
+
+        <!-- Department 2: Medicine -->
+        <div class="card card-hover"
+            style="margin: 0; padding: 2rem; border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(15, 23, 42, 0.85);">
+            <div
+                style="width: 50px; height: 50px; border-radius: 14px; background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center; color: #fca5a5; font-size: 1.5rem; margin-bottom: 1.25rem;">
+                ⚕️
+            </div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
+                Department of Medicine
+            </h3>
+            <div style="font-size: 0.85rem; color: #fca5a5; font-weight: 700; margin-bottom: 0.75rem;">
+                Institute of Medicine (IOM)
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem;">
+                Department Chair: <strong>Dr. Anjali Sharma</strong><br>
+                Rigorous clinical training, medical lab pathology, dental surgery, and healthcare research.
+            </p>
+            <ul
+                style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
+                <li>✓ MBBS (Medicine & Surgery)</li>
+                <li>✓ BDS (Bachelor of Dental Surgery)</li>
+                <li>✓ B.Sc. Nursing</li>
+                <li>✓ B.Pharm (Pharmacy)</li>
+                <li>✓ B.Sc. Medical Lab Technology (MLT)</li>
+            </ul>
+        </div>
+
+        <!-- Department 3: Management -->
+        <div class="card card-hover"
+            style="margin: 0; padding: 2rem; border: 1px solid rgba(245, 158, 11, 0.35); background: rgba(15, 23, 42, 0.85);">
+            <div
+                style="width: 50px; height: 50px; border-radius: 14px; background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: var(--accent-gold); font-size: 1.5rem; margin-bottom: 1.25rem;">
+                💼
+            </div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
+                Department of Management
+            </h3>
+            <div style="font-size: 0.85rem; color: #fde68a; font-weight: 700; margin-bottom: 0.75rem;">
+                Faculty of Management (FOM)
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem;">
+                Department Chair: <strong>Prof. Bikram Thapa</strong><br>
+                Preparing future business executives, financial analysts, and corporate leaders.
+            </p>
+            <ul
+                style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
+                <li>✓ BBA (Business Administration)</li>
+                <li>✓ BBM (Business Management)</li>
+                <li>✓ BBS (Business Studies)</li>
+                <li>✓ BHM (Hotel Management)</li>
+                <li>✓ BIM (Information Management)</li>
+            </ul>
+        </div>
+
+        <!-- Department 4: Science and Humanities -->
+        <div class="card card-hover"
+            style="margin: 0; padding: 2rem; border: 1px solid rgba(139, 92, 246, 0.35); background: rgba(15, 23, 42, 0.85);">
+            <div
+                style="width: 50px; height: 50px; border-radius: 14px; background: rgba(139, 92, 246, 0.18); border: 1px solid rgba(139, 92, 246, 0.4); display: flex; align-items: center; justify-content: center; color: #c084fc; font-size: 1.5rem; margin-bottom: 1.25rem;">
+                🔬
+            </div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
+                Department of Science & Humanities
+            </h3>
+            <div style="font-size: 0.85rem; color: #c084fc; font-weight: 700; margin-bottom: 0.75rem;">
+                IOST & FOHSS
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem;">
+                Department Chair: <strong>Assoc. Prof. Sunita Shrestha</strong><br>
+                Fostering fundamental scientific inquiry, computer science, and liberal arts.
+            </p>
+            <ul
+                style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
+                <li>✓ B.Sc. CSIT (Computer Science & IT)</li>
+                <li>✓ B.Sc. Physics & Applied Math</li>
+                <li>✓ B.Sc. Chemistry & Microbiology</li>
+                <li>✓ BA (English & Sociology)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Portal Access Section -->
+<section id="portal" style="margin-bottom: 3rem;">
+    <div class="card"
+        style="padding: 2.25rem; border: 1px solid rgba(6, 182, 212, 0.4); background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(15, 23, 42, 0.95)); text-align: center;">
+        <span class="badge"
+            style="background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan-light); border: 1px solid rgba(6, 182, 212, 0.4); margin-bottom: 0.75rem;">
+            🔐 SNS College Academic Portal Access
+        </span>
+        <h2 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 0.75rem;">
+            Sign In to the SNS Student & Faculty Portal
+        </h2>
+        <p
+            style="color: var(--text-muted); max-width: 640px; margin: 0 auto 1.5rem auto; font-size: 0.95rem; line-height: 1.6;">
+            Access student transcripts, submit course evaluations, manage academic subjects, and review
+            department-scoped student profiles.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg"
+                style="padding: 0.85rem 2rem; box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);">
+                🔑 Portal Sign In Page →
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-gold btn-lg"
+                style="padding: 0.85rem 2rem; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);">
+                📝 Student Registration
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Public Footer for SNS College -->
+<footer
+    style="padding: 2.5rem 0 1rem 0; border-top: 1px solid var(--border-glass); margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div style="text-align: left;">
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #ffffff; font-size: 1.1rem;">
+                SNS COLLEGE
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+                Kathmandu • Pokhara • Lalitpur Campuses, Nepal
+            </div>
+        </div>
+        <div style="display: flex; gap: 1.5rem; font-size: 0.85rem;">
+            <a href="#about" style="color: var(--text-muted); text-decoration: none;">About</a>
+            <a href="#departments" style="color: var(--text-muted); text-decoration: none;">Departments</a>
+            <a href="{{ url_for('login') }}"
+                style="color: var(--accent-cyan-light); text-decoration: none; font-weight: 700;">Student & Staff
+                Login</a>
+        </div>
+    </div>
+    <div
+        style="font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
+        &copy; 2026 SNS College. All Rights Reserved. Student Grading & Academic Portal.
+    </div>
+</footer>
+{% endblock %}

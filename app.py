@@ -2,10 +2,15 @@ import os
 import sqlite3
 from datetime import timedelta
 from functools import wraps
+# pyrefly: ignore [missing-import]
 from flask import Flask, render_template, request, redirect, url_for, flash, session, g
+# pyrefly: ignore [missing-import]
 from flask_wtf import CSRFProtect
-from flask_wtf.csrf import generate_csrf
+# pyrefly: ignore [missing-import]
+from flask_wtf.csrf import generate_csrf, CSRFError
+# pyrefly: ignore [missing-import]
 from sqlalchemy import func
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 from models import db, Student, Subject, Grade, User, AcademicClass
 
@@ -17,11 +22,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///ins
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV', 'development') == 'production'
+app.config['SESSION_COOKIE_SECURE'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 csrf = CSRFProtect()
 csrf.init_app(app)
 db.init_app(app)
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    flash('Security token refreshed. Please try signing in again.', 'info')
+    return redirect(url_for('login'))
 
 @app.before_request
 def load_logged_in_user():
@@ -38,8 +48,12 @@ def inject_user():
     return dict(current_user=getattr(g, 'user', None), can_manage_grade=user_can_manage_grade, csrf_token=generate_csrf)
 
 def user_can_manage_grade(grade):
+    if g.user is None:
+        return False
     if g.user.role == 'Admin':
         return True
+    if g.user.role == 'Department':
+        return grade.student and grade.student.department == g.user.department
     if g.user.role == 'Teacher' and grade.subject and grade.subject.assigned_teacher_id == g.user.id:
         return True
     return False
@@ -74,7 +88,7 @@ def init_db_if_empty():
                 cursor.execute("PRAGMA table_info(users)")
                 existing_columns = [column[1] for column in cursor.fetchall()]
                 if 'department' not in existing_columns:
-                    cursor.execute("ALTER TABLE users ADD COLUMN department VARCHAR(80) DEFAULT 'General'")
+                    cursor.execute("ALTER TABLE users ADD COLUMN department VARCHAR(80) DEFAULT 'Engineering'")
                     conn.commit()
 
                 cursor.execute("PRAGMA table_info(students)")
@@ -86,7 +100,7 @@ def init_db_if_empty():
                     cursor.execute("ALTER TABLE students ADD COLUMN academic_period VARCHAR(40) DEFAULT 'Semester 1'")
                     conn.commit()
                 if student_columns and 'department' not in student_columns:
-                    cursor.execute("ALTER TABLE students ADD COLUMN department VARCHAR(80) DEFAULT 'General'")
+                    cursor.execute("ALTER TABLE students ADD COLUMN department VARCHAR(80) DEFAULT 'Engineering'")
                     conn.commit()
 
                 cursor.execute("PRAGMA table_info(subjects)")
@@ -100,6 +114,12 @@ def init_db_if_empty():
                         conn.commit()
                     if 'assigned_teacher_id' not in subject_columns:
                         cursor.execute("ALTER TABLE subjects ADD COLUMN assigned_teacher_id INTEGER")
+                        conn.commit()
+                    if 'department' not in subject_columns:
+                        cursor.execute("ALTER TABLE subjects ADD COLUMN department VARCHAR(80) DEFAULT 'Engineering'")
+                        conn.commit()
+                    if 'academic_period' not in subject_columns:
+                        cursor.execute("ALTER TABLE subjects ADD COLUMN academic_period VARCHAR(40) DEFAULT 'Semester 1'")
                         conn.commit()
 
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -128,30 +148,64 @@ def init_db_if_empty():
                     conn.executescript(f.read())
                 conn.close()
 
+        # Check admin user name
+        admin_acc = User.query.filter_by(username='admin').first()
+        if admin_acc and admin_acc.full_name != 'Er. Sushmita Marasini':
+            admin_acc.full_name = 'Er. Sushmita Marasini'
+            db.session.commit()
+
         if User.query.count() == 0:
-            # Seed default SNS College admin, department, teacher, and student users
+            # Seed default SNS College admin, department heads, teacher, and student users
             admin_user = User(
                 username='admin',
                 email='admin@sns.edu.np',
-                full_name='Prof. Dr. Ramesh Karki, Campus Chief',
+                full_name='Er. Sushmita Marasini',
                 role='Admin'
             )
             admin_user.set_password('admin123')
 
-            department_user = User(
-                username='department',
-                email='department@sns.edu.np',
-                full_name='Dr. Manisha Koirala, Department Head',
+            dept_eng = User(
+                username='eng_head',
+                email='dept_eng@sns.edu.np',
+                full_name='Er. Subash Rajkarnikar, Dean - Institute of Engineering (IOE)',
                 role='Department',
-                department='Computer Science'
+                department='Engineering'
             )
-            department_user.set_password('dept123')
+            dept_eng.set_password('dept123')
+
+            dept_med = User(
+                username='med_head',
+                email='dept_med@sns.edu.np',
+                full_name='Dr. Anjali Sharma, Dean - Institute of Medicine (IOM)',
+                role='Department',
+                department='Medicine'
+            )
+            dept_med.set_password('dept123')
+
+            dept_mgmt = User(
+                username='mgmt_head',
+                email='dept_mgmt@sns.edu.np',
+                full_name='Prof. Bikram Thapa, Dean - Faculty of Management (FOM)',
+                role='Department',
+                department='Management'
+            )
+            dept_mgmt.set_password('dept123')
+
+            dept_sh = User(
+                username='sh_head',
+                email='dept_sh@sns.edu.np',
+                full_name='Assoc. Prof. Sunita Shrestha, Dean - Institute of Science & Technology (IOST)',
+                role='Department',
+                department='Science and Humanities'
+            )
+            dept_sh.set_password('dept123')
 
             teacher_user = User(
                 username='teacher',
                 email='teacher@sns.edu.np',
-                full_name='Assoc. Prof. Sunita Shrestha, HOD CSIT',
-                role='Teacher'
+                full_name='Assoc. Prof. Sunita Shrestha',
+                role='Teacher',
+                department='Engineering'
             )
             teacher_user.set_password('teacher123')
 
@@ -159,11 +213,12 @@ def init_db_if_empty():
                 username='student',
                 email='student@sns.edu.np',
                 full_name='Aarav Sharma',
-                role='Student'
+                role='Student',
+                department='Engineering'
             )
             student_user.set_password('student123')
 
-            db.session.add_all([admin_user, department_user, teacher_user, student_user])
+            db.session.add_all([admin_user, dept_eng, dept_med, dept_mgmt, dept_sh, teacher_user, student_user])
             db.session.commit()
 
         # Assign a default set of subjects to the SNS College teacher account.
@@ -190,11 +245,8 @@ def login():
         remember = request.form.get('remember')
 
         login_input_lower = login_input.lower()
-        if role in ['Admin', 'Department', 'Teacher']:
-            if '@' not in login_input_lower or not login_input_lower.endswith('@sns.edu.np'):
-                flash('Admin, department, and lecturer login requires an SNS College email ending in @sns.edu.np.', 'danger')
-                return render_template('login.html')
-        elif '@' in login_input_lower and not login_input_lower.endswith('@sns.edu.np'):
+
+        if '@' in login_input_lower and not login_input_lower.endswith('@sns.edu.np'):
             flash('Please sign in with an SNS College email ending in @sns.edu.np, or use your username.', 'danger')
             return render_template('login.html')
 
@@ -224,7 +276,10 @@ def login():
                 flash('Selected department does not match your account department.', 'danger')
                 return render_template('login.html')
 
+            csrf_val = session.get('_csrf_token')
             session.clear()
+            if csrf_val:
+                session['_csrf_token'] = csrf_val
             session['user_id'] = user.id
             if remember:
                 session.permanent = True
@@ -318,7 +373,7 @@ def register():
             username=username,
             email=email,
             role=role,
-            department=department if role == 'Student' else 'General'
+            department=department if role in ['Student', 'Department', 'Teacher'] else 'General'
         )
         new_user.set_password(password)
         db.session.add(new_user)
@@ -333,11 +388,11 @@ def register():
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
-                grade_level='Undergraduate',
+                grade_level=department,
                 faculty=faculty,
                 academic_period=academic_period,
                 department=department,
-                status='Active'
+                status='Undergraduated'
             )
             db.session.add(new_student)
 
@@ -350,27 +405,50 @@ def register():
 
 @app.route('/logout')
 def logout():
+    csrf_val = session.get('_csrf_token')
     session.clear()
+    if csrf_val:
+        session['_csrf_token'] = csrf_val
     flash('You have been logged out successfully.', 'info')
     return redirect(url_for('login'))
 
 @app.route('/')
+def home():
+    return render_template('home.html')
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    total_students = Student.query.count()
-    total_subjects = Subject.query.count()
-    total_grades = Grade.query.count()
-    total_users = User.query.count()
-
-    students = Student.query.all()
-    avg_gpa = round(sum(s.gpa for s in students) / max(len(students), 1), 2)
-
-    if g.user.role == 'Student':
+    dept_registrations = []
+    if g.user.role == 'Department':
+        dept = g.user.department
+        students = Student.query.filter_by(department=dept).all()
+        total_students = len(students)
+        total_subjects = Subject.query.filter_by(department=dept).count()
+        total_grades = Grade.query.join(Student).filter(Student.department == dept).count()
+        total_users = User.query.filter_by(department=dept).count()
+        avg_gpa = round(sum(s.gpa for s in students) / max(len(students), 1), 2)
+        recent_grades = Grade.query.join(Student).filter(Student.department == dept).order_by(Grade.created_at.desc()).limit(5).all()
+        dept_registrations = Student.query.filter_by(department=dept).order_by(Student.created_at.desc()).limit(5).all()
+        student_profile = None
+        student_grade_count = 0
+    elif g.user.role == 'Student':
+        total_students = Student.query.count()
+        total_subjects = Subject.query.count()
+        total_grades = Grade.query.count()
+        total_users = User.query.count()
+        students = Student.query.all()
+        avg_gpa = round(sum(s.gpa for s in students) / max(len(students), 1), 2)
         student_profile = Student.query.filter_by(email=g.user.email).first()
         recent_grades = Grade.query.filter_by(student_id=student_profile.id).order_by(Grade.created_at.desc()).limit(5).all() if student_profile else []
         student_grade_count = Grade.query.filter_by(student_id=student_profile.id).count() if student_profile else 0
     else:
+        total_students = Student.query.count()
+        total_subjects = Subject.query.count()
+        total_grades = Grade.query.count()
+        total_users = User.query.count()
+        students = Student.query.all()
+        avg_gpa = round(sum(s.gpa for s in students) / max(len(students), 1), 2)
         recent_grades = Grade.query.order_by(Grade.created_at.desc()).limit(5).all()
         student_profile = None
         student_grade_count = 0
@@ -383,6 +461,7 @@ def dashboard():
         total_users=total_users,
         avg_gpa=avg_gpa,
         recent_grades=recent_grades,
+        dept_registrations=dept_registrations,
         student_profile=student_profile,
         student_grade_count=student_grade_count
     )
@@ -573,6 +652,8 @@ def admin_create_subject():
     if request.method == 'POST':
         code = request.form.get('code', '').strip().upper()
         name = request.form.get('name', '').strip()
+        department = request.form.get('department', '').strip() or 'Engineering'
+        academic_period = request.form.get('academic_period', '').strip() or 'Semester 1'
         faculty = request.form.get('faculty', '').strip() or 'General'
         level = request.form.get('level', '').strip() or 'Bachelor'
         credits = request.form.get('credits', 3)
@@ -586,7 +667,7 @@ def admin_create_subject():
             flash('A subject with that code already exists.', 'warning')
             return render_template('admin_edit_subject.html', subject=None, teachers=teachers)
 
-        subject = Subject(code=code, name=name, faculty=faculty, level=level, credits=int(credits))
+        subject = Subject(code=code, name=name, department=department, academic_period=academic_period, faculty=faculty, level=level, credits=int(credits))
         subject.assigned_teacher_id = int(assigned_teacher_id) if assigned_teacher_id else None
         db.session.add(subject)
         db.session.commit()
@@ -607,6 +688,8 @@ def admin_edit_subject(subject_id):
     if request.method == 'POST':
         subject.code = request.form.get('code', '').strip().upper()
         subject.name = request.form.get('name', '').strip()
+        subject.department = request.form.get('department', '').strip() or 'Engineering'
+        subject.academic_period = request.form.get('academic_period', '').strip() or 'Semester 1'
         subject.faculty = request.form.get('faculty', '').strip() or 'General'
         subject.level = request.form.get('level', '').strip() or 'Bachelor'
         subject.credits = int(request.form.get('credits', subject.credits))
@@ -742,6 +825,18 @@ def students():
     search_query = request.args.get('search', '').strip()
     if g.user.role == 'Student':
         student_list = Student.query.filter_by(email=g.user.email).all()
+    elif g.user.role == 'Department':
+        dept = g.user.department
+        if search_query:
+            student_list = Student.query.filter(
+                Student.department == dept,
+                (Student.first_name.ilike(f"%{search_query}%")) |
+                (Student.last_name.ilike(f"%{search_query}%")) |
+                (Student.student_code.ilike(f"%{search_query}%")) |
+                (Student.email.ilike(f"%{search_query}%"))
+            ).all()
+        else:
+            student_list = Student.query.filter_by(department=dept).all()
     elif search_query:
         student_list = Student.query.filter(
             (Student.first_name.ilike(f"%{search_query}%")) |
@@ -765,24 +860,19 @@ def add_student():
         first_name = request.form.get('first_name', '').strip()
         last_name = request.form.get('last_name', '').strip()
         email = request.form.get('email', '').strip()
-        grade_level = request.form.get('grade_level', '').strip()
+        department = request.form.get('department', '').strip() or 'Engineering'
+        if g.user.role == 'Department':
+            department = g.user.department
+        grade_level = department
         faculty = request.form.get('faculty', '').strip() or 'General'
         academic_period = request.form.get('academic_period', '').strip() or 'Semester 1'
+        status = request.form.get('status', 'Undergraduated').strip()
+        if status not in ['Graduated', 'Undergraduated']:
+            status = 'Undergraduated'
 
-        if not all([student_code, first_name, last_name, email, grade_level, academic_period]):
+        if not all([student_code, first_name, last_name, email, grade_level, department, faculty, academic_period]):
             flash('All fields are required.', 'danger')
             return render_template('add_student.html')
-
-        if faculty == 'Engineering':
-            valid_periods = [f'Semester {i}' for i in range(1, 9)]
-            if academic_period not in valid_periods:
-                flash('Engineering students must select a semester between 1 and 8.', 'danger')
-                return render_template('add_student.html')
-        else:
-            valid_periods = [f'Year {i}' for i in range(1, 6)]
-            if academic_period not in valid_periods:
-                flash('Non-engineering students must select an academic year between 1 and 5.', 'danger')
-                return render_template('add_student.html')
 
         existing = Student.query.filter((Student.student_code == student_code) | (Student.email == email)).first()
         if existing:
@@ -795,8 +885,10 @@ def add_student():
             last_name=last_name,
             email=email,
             grade_level=grade_level,
+            department=department,
             faculty=faculty,
-            academic_period=academic_period
+            academic_period=academic_period,
+            status=status
         )
         db.session.add(new_student)
         db.session.commit()
@@ -809,14 +901,21 @@ def add_student():
 @login_required
 def edit_student(id):
     student = Student.query.get_or_404(id)
+    if g.user.role == 'Department' and student.department != g.user.department:
+        flash('You are only authorized to manage students in your department.', 'danger')
+        return redirect(url_for('students'))
+
     if request.method == 'POST':
         student.first_name = request.form.get('first_name', '').strip()
         student.last_name = request.form.get('last_name', '').strip()
         student.email = request.form.get('email', '').strip()
-        student.grade_level = request.form.get('grade_level', '').strip()
+        if g.user.role != 'Department':
+            student.department = request.form.get('department', student.department).strip() or 'Engineering'
+        student.grade_level = student.department
         student.faculty = request.form.get('faculty', '').strip() or 'General'
         student.academic_period = request.form.get('academic_period', 'Semester 1').strip() or 'Semester 1'
-        student.status = request.form.get('status', 'Active').strip()
+        status = request.form.get('status', 'Undergraduated').strip()
+        student.status = status if status in ['Graduated', 'Undergraduated'] else 'Undergraduated'
 
         db.session.commit()
         flash('Student record updated successfully.', 'success')
@@ -828,6 +927,10 @@ def edit_student(id):
 @login_required
 def delete_student(id):
     student = Student.query.get_or_404(id)
+    if g.user.role == 'Department' and student.department != g.user.department:
+        flash('You are only authorized to manage students in your department.', 'danger')
+        return redirect(url_for('students'))
+
     db.session.delete(student)
     db.session.commit()
     flash('Student deleted successfully.', 'info')
@@ -844,7 +947,16 @@ def grades():
         student_id = request.form.get('student_id')
         subject_id = request.form.get('subject_id')
         score = float(request.form.get('score', 0))
-        term = request.form.get('term', 'Fall 2026').strip()
+        term = request.form.get('term', 'Semester Exam 2082').strip()
+
+        target_student = Student.query.get(student_id)
+        if not target_student:
+            flash('Selected student not found.', 'danger')
+            return redirect(url_for('grades'))
+
+        if g.user.role == 'Department' and target_student.department != g.user.department:
+            flash('You may only submit grades for students in your department.', 'danger')
+            return redirect(url_for('grades'))
 
         if g.user.role == 'Teacher':
             subject = Subject.query.filter_by(id=subject_id, assigned_teacher_id=g.user.id).first()
@@ -871,6 +983,13 @@ def grades():
         all_grades = Grade.query.filter_by(student_id=student_record.id).order_by(Grade.created_at.desc()).all() if student_record else []
         all_students = [student_record] if student_record else []
         all_subjects = Subject.query.all()
+    elif g.user.role == 'Department':
+        dept = g.user.department
+        all_grades = Grade.query.join(Student).filter(Student.department == dept).order_by(Grade.created_at.desc()).all()
+        all_students = Student.query.filter_by(department=dept).order_by(Student.first_name).all()
+        all_subjects = Subject.query.filter_by(department=dept).order_by(Subject.code).all()
+        if not all_subjects:
+            all_subjects = Subject.query.order_by(Subject.code).all()
     elif g.user.role == 'Teacher':
         all_grades = Grade.query.join(Subject).filter(Subject.assigned_teacher_id == g.user.id).order_by(Grade.created_at.desc()).all()
         all_students = Student.query.all()

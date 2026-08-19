@@ -20,7 +20,7 @@
     {% if current_user.role != 'Student' %}
     <div class="card" style="height: fit-content; position: sticky; top: 95px;">
         <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--accent-cyan-light); display: flex; align-items: center; gap: 0.5rem;">
-            📝 Issue Research Evaluation
+            📝 Issue Subject Evaluation
         </h2>
 
         <form method="POST" action="{{ url_for('grades') }}">
@@ -36,11 +36,11 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="subject_id">Research Module / Subject</label>
+                <label class="form-label" for="subject_id">Subject Assigned</label>
                 <select id="subject_id" name="subject_id" class="form-control" required>
-                    <option value="" disabled selected>-- Choose STEM Module --</option>
+                    <option value="" disabled selected>-- Choose Subject --</option>
                     {% for subject in subjects %}
-                        <option value="{{ subject.id }}">{{ subject.code }} - {{ subject.name }} ({{ subject.credits }} ECTS)</option>
+                        <option value="{{ subject.id }}">{{ subject.code }} - {{ subject.name }} ({{ subject.credits }} Credits)</option>
                     {% endfor %}
                 </select>
             </div>
@@ -96,7 +96,7 @@
                 <thead>
                     <tr>
                         <th>Scholar Name</th>
-                        <th>Research Module</th>
+                        <th>Subject Assigned</th>
                         <th>Credits</th>
                         <th>Marks %</th>
                         <th>Grade</th>
@@ -151,7 +151,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
                             No course grade evaluations recorded yet.
                         </td>
                     </tr>

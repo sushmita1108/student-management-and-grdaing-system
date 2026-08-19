@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ 'Edit' if subject else 'Create' }} Research Module{% endblock %}
+{% block title %}{{ 'Edit' if subject else 'Create' }} Assigned Subject{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">{{ 'Edit' if subject else 'Create' }} Research Module</h1>
-        <p class="page-subtitle">Configure independent SNS College research modules with faculty and department mapping. This portal is managed as a non-university academic institute.</p>
+        <h1 class="page-title">{{ 'Edit' if subject else 'Create' }} Assigned Subject</h1>
+        <p class="page-subtitle">Configure SNS College subjects with department, semester/year, and teacher mapping.</p>
     </div>
     <div>
-        <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">&larr; Back to Research Modules</a>
+        <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">&larr; Back to Subjects Assigned</a>
     </div>
 </div>
 
@@ -17,33 +17,49 @@
     <form method="POST" action="{{ url_for('admin_edit_subject', subject_id=subject.id) if subject else url_for('admin_create_subject') }}">
         {{ csrf_field() }}
         <div class="form-group">
-            <label class="form-label" for="code">Research Module Code</label>
+            <label class="form-label" for="code">Subject Code</label>
             <input type="text" id="code" name="code" class="form-control" value="{{ subject.code if subject else '' }}" required>
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="name">Research Module / Subject Name</label>
+            <label class="form-label" for="name">Subject Name</label>
             <input type="text" id="name" name="name" class="form-control" value="{{ subject.name if subject else '' }}" required>
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="faculty">Department</label>
-            <select id="faculty" name="faculty" class="form-control">
-                {% set faculty_value = subject.faculty if subject else '' %}
-                <option value="" disabled {% if not faculty_value %}selected{% endif %}>Select Department</option>
-                <option value="Engineering" {% if faculty_value == 'Engineering' %}selected{% endif %}>Engineering</option>
-                <option value="Medicine" {% if faculty_value == 'Medicine' %}selected{% endif %}>Medicine</option>
-                <option value="Management" {% if faculty_value == 'Management' %}selected{% endif %}>Management</option>
-                <option value="Science" {% if faculty_value == 'Science' %}selected{% endif %}>Science</option>
-                <option value="Humanities" {% if faculty_value == 'Humanities' %}selected{% endif %}>Humanities</option>
+            <label class="form-label" for="department">Department</label>
+            <select id="department" name="department" class="form-control" required>
+                {% set dept_value = subject.department if subject else 'Engineering' %}
+                <option value="Engineering" {% if dept_value == 'Engineering' %}selected{% endif %}>Engineering</option>
+                <option value="Medicine" {% if dept_value == 'Medicine' %}selected{% endif %}>Medicine</option>
+                <option value="Management" {% if dept_value == 'Management' %}selected{% endif %}>Management</option>
+                <option value="Science and Humanities" {% if dept_value == 'Science and Humanities' %}selected{% endif %}>Science and Humanities</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="level">Academic Level</label>
-            <select id="level" name="level" class="form-control">
-                <option value="Bachelor" selected>Bachelor</option>
+            <label class="form-label" for="academic_period">Semester / Academic Period</label>
+            <select id="academic_period" name="academic_period" class="form-control" required>
+                {% set period_value = subject.academic_period if subject else 'Semester 1' %}
+                <option value="Semester 1" {% if period_value == 'Semester 1' %}selected{% endif %}>Semester 1</option>
+                <option value="Semester 2" {% if period_value == 'Semester 2' %}selected{% endif %}>Semester 2</option>
+                <option value="Semester 3" {% if period_value == 'Semester 3' %}selected{% endif %}>Semester 3</option>
+                <option value="Semester 4" {% if period_value == 'Semester 4' %}selected{% endif %}>Semester 4</option>
+                <option value="Semester 5" {% if period_value == 'Semester 5' %}selected{% endif %}>Semester 5</option>
+                <option value="Semester 6" {% if period_value == 'Semester 6' %}selected{% endif %}>Semester 6</option>
+                <option value="Semester 7" {% if period_value == 'Semester 7' %}selected{% endif %}>Semester 7</option>
+                <option value="Semester 8" {% if period_value == 'Semester 8' %}selected{% endif %}>Semester 8</option>
+                <option value="Year 1" {% if period_value == 'Year 1' %}selected{% endif %}>Year 1</option>
+                <option value="Year 2" {% if period_value == 'Year 2' %}selected{% endif %}>Year 2</option>
+                <option value="Year 3" {% if period_value == 'Year 3' %}selected{% endif %}>Year 3</option>
+                <option value="Year 4" {% if period_value == 'Year 4' %}selected{% endif %}>Year 4</option>
+                <option value="Year 5" {% if period_value == 'Year 5' %}selected{% endif %}>Year 5</option>
             </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="faculty">Faculty / Specialization</label>
+            <input type="text" id="faculty" name="faculty" class="form-control" value="{{ subject.faculty if subject else 'General' }}">
         </div>
 
         <div class="form-group">

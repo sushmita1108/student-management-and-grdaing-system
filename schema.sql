@@ -24,19 +24,22 @@ CREATE TABLE students (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    grade_level VARCHAR(100) NOT NULL, -- Program Stream (e.g. +2 Science, B.Sc. CSIT, M.Sc. Data Science)
+    grade_level VARCHAR(100) NOT NULL, -- Department mapped as Grade Level
+    department VARCHAR(80) NOT NULL DEFAULT 'Engineering',
     program_type VARCHAR(20) NOT NULL DEFAULT 'Bachelor',
     faculty VARCHAR(80) NOT NULL DEFAULT 'General',
     academic_period VARCHAR(40) NOT NULL DEFAULT 'Semester 1',
-    status VARCHAR(40) DEFAULT 'Active (Passed)',
+    status VARCHAR(40) DEFAULT 'Undergraduated',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Subjects / Courses Table with Bachelor and Master faculty mapping
+-- Subjects / Courses Table with Department and Semester mapping
 CREATE TABLE subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(160) NOT NULL,
+    department VARCHAR(80) DEFAULT 'Engineering',
+    academic_period VARCHAR(40) DEFAULT 'Semester 1',
     faculty VARCHAR(80) DEFAULT 'General',
     level VARCHAR(20) DEFAULT 'Bachelor',
     credits INTEGER DEFAULT 3,
@@ -51,44 +54,36 @@ CREATE TABLE grades (
     subject_id INTEGER NOT NULL,
     score REAL NOT NULL CHECK(score >= 0 AND score <= 100),
     letter_grade VARCHAR(4),
-    term VARCHAR(60) NOT NULL DEFAULT 'Board Exam 2082 (2026)',
+    term VARCHAR(60) NOT NULL DEFAULT 'Semester Exam 2082',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
 
 -- Sample SNS College Student Seed Data
-INSERT INTO students (student_code, first_name, last_name, email, grade_level, program_type, faculty, status) VALUES
-('SNS-809214', 'Aarav', 'Sharma', 'aarav.sharma@sns.edu.np', '+2 Science (Grade 12)', 'Bachelor', 'Science', 'Active (Distinction List)'),
-('SNS-809218', 'Smarika', 'Gurung', 'smarika.gurung@sns.edu.np', '+2 Management (Grade 11)', 'Bachelor', 'Management', 'Active (First Division)'),
-('SNS-5-2-0041', 'Pooja', 'Shrestha', 'pooja.shrestha@sns.edu.np', 'B.Sc. CSIT (3rd Year)', 'Bachelor', 'Science & Technology', 'Active (First Division with Distinction)'),
-('SNS-5-2-0089', 'Rohan', 'Maharjan', 'rohan.maharjan@sns.edu.np', 'BCA - Bachelor of Computer Application', 'Bachelor', 'Science & Technology', 'Active (First Division)'),
-('SNS-5-2-0104', 'Anusha', 'Adhikari', 'anusha.adikari@sns.edu.np', 'BBA - Bachelor of Business Administration', 'Bachelor', 'Management', 'Active (First Division)'),
-('SNS-7-1-0123', 'Mina', 'KC', 'mina.kc@sns.edu.np', 'M.Sc. Data Science', 'Master', 'Science & Technology', 'Active (Research Scholar)'),
-('SNS-7-1-0145', 'Ritesh', 'Adhikari', 'ritesh.adhikari@sns.edu.np', 'M.Sc. Management', 'Master', 'Management', 'Active (Thesis Track)');
+INSERT INTO students (student_code, first_name, last_name, email, grade_level, department, program_type, faculty, academic_period, status) VALUES
+('SNS-809214', 'Bigyata', 'Pradhan', 'bigyata.pradhan@sns.edu.np', 'Engineering', 'Engineering', 'Bachelor', 'Institute of Engineering (IOE)', 'Semester 1', 'Undergraduated'),
+('SNS-809218', 'Smarika', 'Gurung', 'smarika.gurung@sns.edu.np', 'Management', 'Management', 'Bachelor', 'Faculty of Management (FOM)', 'Year 1', 'Undergraduated'),
+('SNS-5-2-0041', 'Nishita', 'Dev', 'nishita.dev@sns.edu.np', 'Engineering', 'Engineering', 'Bachelor', 'Institute of Engineering (IOE)', 'Semester 3', 'Graduated'),
+('SNS-5-2-0089', 'Nischal', 'Maharjan', 'nischal.maharjan@sns.edu.np', 'Medicine', 'Medicine', 'Bachelor', 'Institute of Medicine (IOM)', 'Year 2', 'Undergraduated'),
 
--- SNS College Higher Secondary, Bachelor, and Master Subjects by faculty
-INSERT INTO subjects (code, name, faculty, level, credits) VALUES
-('ENG-101', 'English Communication & Academic Writing', 'Science & Technology', 'Bachelor', 3),
-('NEP-102', 'Nepali Language & Literature', 'Management', 'Bachelor', 3),
-('PHY-201', 'Physics - Mechanics & Modern Physics', 'Science & Technology', 'Bachelor', 4),
-('CHEM-202', 'Chemistry - Organic & Inorganic Chemistry', 'Science & Technology', 'Bachelor', 4),
-('MATH-203', 'Mathematics - Calculus, Statistics & Linear Algebra', 'Science & Technology', 'Bachelor', 4),
-('CSIT-301', 'B.Sc. CSIT - Data Structures & Algorithms', 'Science & Technology', 'Bachelor', 3),
-('CSIT-302', 'B.Sc. CSIT - Database Systems & Web Technology', 'Science & Technology', 'Bachelor', 3),
-('BCA-303', 'BCA - Object Oriented Programming & Software Design', 'Science & Technology', 'Bachelor', 3),
-('BBA-305', 'BBA - Financial Management & Accounting', 'Management', 'Bachelor', 3),
-('BBA-306', 'BBA - Marketing Management & Ethics', 'Management', 'Bachelor', 3),
-('MSC-501', 'M.Sc. Data Science - Statistical Methods & Machine Learning', 'Science & Technology', 'Master', 4),
-('MSC-502', 'M.Sc. Management - Strategic Planning & Leadership', 'Management', 'Master', 4),
-('MSC-503', 'M.Sc. Information Systems - Cloud & Security Governance', 'Science & Technology', 'Master', 4);
+-- SNS Bachelor subjects 
+INSERT INTO subjects (code, name, department, academic_period, faculty, level, credits) VALUES
+('ENG-101', 'Engineering Mathematics I', 'Engineering', 'Semester 1', 'Institute of Engineering (IOE)', 'Bachelor', 3),
+('CSIT-301', 'Data Structures & Algorithms', 'Engineering', 'Semester 2', 'Institute of Engineering (IOE)', 'Bachelor', 3),
+('MED-101', 'Human Anatomy & Physiology', 'Medicine', 'Year 1', 'Institute of Medicine (IOM)', 'Bachelor', 4),
+('MED-202', 'Clinical Pathology & Pharmacology', 'Medicine', 'Year 2', 'Institute of Medicine (IOM)', 'Bachelor', 4),
+('BBA-305', 'Financial Management & Accounting', 'Management', 'Year 1', 'Faculty of Management (FOM)', 'Bachelor', 3),
+('BBA-306', 'Marketing Management & Business Ethics', 'Management', 'Year 2', 'Faculty of Management (FOM)', 'Bachelor', 3),
+('SCI-101', 'General Physics & Applied Mathematics', 'Science and Humanities', 'Year 1', 'Institute of Science and Technology (IOST)', 'Bachelor', 3),
+('SCI-102', 'Organic Chemistry & Environmental Science', 'Science and Humanities', 'Year 2', 'Faculty of Humanities and Social Sciences (FOHSS)', 'Bachelor', 3);
 
 -- Academic Classes / Sections Table
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(120) NOT NULL,
-    department VARCHAR(80) DEFAULT 'General',
+    department VARCHAR(80) DEFAULT 'Engineering',
     level VARCHAR(20) DEFAULT 'Bachelor',
     description VARCHAR(255),
     advisor_id INTEGER,
@@ -97,18 +92,19 @@ CREATE TABLE classes (
 
 -- Seed academic classes
 INSERT INTO classes (code, name, department, level, description) VALUES
-('SNS-CSIT-01', 'B.Sc. CSIT Section 1', 'Science & Technology', 'Bachelor', 'Full-time software development and systems section.'),
-('SNS-BBA-01', 'BBA Management Section 1', 'Management', 'Bachelor', 'Business administration cohort with leadership focus.'),
-('SNS-MSC-01', 'M.Sc. Data Science Cohort', 'Science & Technology', 'Master', 'Advanced analytics and machine learning research track.');
+('SNS-ENG-01', 'Engineering Cohort 1', 'Engineering', 'Bachelor', 'Full-time software and systems engineering section.'),
+('SNS-MED-01', 'Medicine Cohort 1', 'Medicine', 'Bachelor', 'Clinical MBBS research cohort.'),
+('SNS-MGMT-01', 'Management Cohort 1', 'Management', 'Bachelor', 'Business administration cohort with leadership focus.'),
+('SNS-SH-01', 'Science & Humanities Cohort 1', 'Science and Humanities', 'Bachelor', 'Advanced science and humanities cohort.');
 
 -- Sample Grade Records
 INSERT INTO grades (student_id, subject_id, score, letter_grade, term) VALUES
-(1, 3, 92.5, 'A+', 'NEB Board Exam 2082'),
-(1, 5, 88.0, 'A', 'NEB Board Exam 2082'),
-(2, 2, 84.0, 'A', 'NEB Board Exam 2082'),
-(3, 6, 95.0, 'A+', 'TU Final Exam 2082'),
-(3, 7, 91.0, 'A+', 'TU Final Exam 2082'),
-(4, 9, 89.5, 'A', 'TU Semester Exam 2082'),
-(5, 10, 87.0, 'A', 'TU Semester Exam 2082'),
-(6, 11, 93.0, 'A+', 'TU Semester Exam 2082'),
-(7, 12, 88.5, 'A', 'TU Semester Exam 2082');
+(1, 1, 92.5, 'A+', 'Semester Exam 2082'),
+(1, 2, 88.0, 'A', 'Semester Exam 2082'),
+(2, 5, 84.0, 'A', 'Semester Exam 2082'),
+(3, 1, 95.0, 'A+', 'Semester Exam 2082'),
+(3, 2, 91.0, 'A+', 'Semester Exam 2082'),
+(4, 3, 89.5, 'A', 'Annual Exam 2082'),
+(5, 6, 87.0, 'A', 'Annual Exam 2082'),
+(6, 7, 93.0, 'A+', 'Annual Exam 2082'),
+(7, 8, 88.5, 'A', 'Annual Exam 2082');

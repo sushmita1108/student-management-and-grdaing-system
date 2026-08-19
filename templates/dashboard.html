@@ -1,153 +1,345 @@
 {% extends 'base.html' %}
 
-{% block title %}College Dashboard{% endblock %}
+{% block title %}SNS College Dashboard{% endblock %}
 
 {% block content %}
-<!-- Welcome College Hero Banner -->
-<div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(245, 158, 11, 0.15)); border: 1px solid rgba(6, 182, 212, 0.4); padding: 2.25rem; margin-bottom: 2rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+<!-- Welcome Hero Glass Banner -->
+<div class="card"
+    style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.22), rgba(139, 92, 246, 0.18), rgba(245, 158, 11, 0.15)); border: 1px solid rgba(103, 232, 249, 0.4); padding: 2.25rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);">
+    <!-- Ambient Inner Glow Accent -->
+    <div
+        style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(0,0,0,0) 70%); pointer-events: none;">
+    </div>
+    <div
+        style="position: absolute; bottom: -50px; left: 30%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(0,0,0,0) 70%); pointer-events: none;">
+    </div>
+
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; position: relative; z-index: 2;">
         <div>
-            <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.5rem;">
-                <h1 class="page-title" style="margin-bottom: 0; background: linear-gradient(135deg, #ffffff, #67e8f9); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    Welcome, {{ current_user.full_name }} 
+            <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                <h1 class="page-title"
+                    style="margin-bottom: 0; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #ffffff 0%, #67e8f9 50%, #fde68a 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Welcome, {{ current_user.full_name }}
                 </h1>
-                <span class="badge badge-teacher">
-                    {{ current_user.role }} Portal
+                <span class="badge badge-teacher"
+                    style="font-size: 0.825rem; padding: 0.4rem 0.8rem; letter-spacing: 0.5px;">
+                    👑 {{ current_user.role }} Portal
+                </span>
+                <span class="badge"
+                    style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.8rem;">
+                    🏛️ Academic Portal
                 </span>
             </div>
-            <p style="color: var(--text-muted); font-size: 0.98rem; max-width: 720px;">
-                Verified Account: <strong>{{ current_user.email }}</strong>. Welcome to the SNS College student grading portal. Manage student records, programs, and grade evaluations for the college.
+            <p style="color: var(--text-muted); font-size: 0.98rem; max-width: 760px; line-height: 1.6;">
+                Verified Email: <strong style="color: #67e8f9;">{{ current_user.email }}</strong>
+                {% if current_user.role == 'Department' %}
+                • Managing Chair for <strong style="color: #fde68a;">{{ current_user.department }} Department</strong>.
+                {% endif %}
+                Academic management dashboard for SNS College degree programs.
             </p>
         </div>
         {% if current_user.role != 'Student' %}
         <div style="display: flex; gap: 0.85rem; flex-wrap: wrap;">
-            <a href="{{ url_for('add_student') }}" class="btn btn-primary">+ Enroll Scholar</a>
-            <a href="{{ url_for('grades') }}" class="btn btn-gold">📝 Issue Evaluation</a>
+            <a href="{{ url_for('add_student') }}" class="btn btn-primary"
+                style="box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);">+ Enroll Scholar</a>
+            <a href="{{ url_for('grades') }}" class="btn btn-gold"
+                style="box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);">📝 Issue Evaluation</a>
             {% if current_user.role == 'Teacher' or current_user.role == 'Admin' %}
-            <a href="{{ url_for('assigned_subjects') }}" class="btn btn-secondary">📚 Assigned Subjects</a>
+            <a href="{{ url_for('assigned_subjects') }}" class="btn btn-secondary">📚 My Subjects</a>
             {% endif %}
             {% if current_user.role == 'Admin' %}
-            <a href="{{ url_for('admin_assign_subjects') }}" class="btn btn-secondary">⚙️ Assign Teachers</a>
-            <a href="{{ url_for('admin_manage_users') }}" class="btn btn-secondary">👥 Manage Accounts</a>
-            <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">📘 Manage Subjects</a>
-            <a href="{{ url_for('admin_manage_classes') }}" class="btn btn-secondary">🏫 Manage Classes</a>
+            <a href="{{ url_for('admin_assign_subjects') }}" class="btn btn-secondary">⚙️ Assign Faculty</a>
+            <a href="{{ url_for('admin_manage_users') }}" class="btn btn-secondary">👥 Accounts</a>
+            <a href="{{ url_for('admin_manage_subjects') }}" class="btn btn-secondary">📘 Subjects Assigned</a>
             {% endif %}
         </div>
         {% endif %}
     </div>
 </div>
 
-{% if student_profile %}
-<div class="card" style="margin-bottom: 2rem; padding: 1.75rem; border: 1px solid rgba(6, 182, 212, 0.35);">
-    <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 240px; align-items: center;">
+{% if current_user.role == 'Department' %}
+<div class="card"
+    style="margin-bottom: 2rem; padding: 1.25rem 1.75rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(16, 185, 129, 0.12)); border: 1px solid rgba(6, 182, 212, 0.35);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <h2 style="font-size: 1.45rem; margin-bottom: 0.5rem;">My Student Summary</h2>
-            <p style="color: var(--text-muted);">This view is personalized for your student account. Only your grades and academic profile are shown.</p>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li><strong>Program:</strong> {{ student_profile.grade_level }}</li>
-                <li><strong>Faculty:</strong> {{ student_profile.faculty }}</li>
-                <li><strong>Status:</strong> {{ student_profile.status }}</li>
-                <li><strong>GPA:</strong> {{ student_profile.gpa }} / 4.0</li>
-                <li><strong>Grades Submitted:</strong> {{ student_grade_count }}</li>
-            </ul>
+            <div
+                style="font-weight: 800; color: #67e8f9; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                🔔 Department Automatic Registration Active
+            </div>
+            <div style="color: var(--text-muted); font-size: 0.875rem;">
+                When new students or teachers sign up with their college email (<strong
+                    style="color: #ffffff;">@sns.edu.np</strong>), they are automatically assigned to the <strong
+                    style="color: #fde68a;">{{ current_user.department }} Department</strong>. No manual department
+                enrollment required!
+            </div>
         </div>
-        <div style="background: rgba(6, 182, 212, 0.08); padding: 1rem; border-radius: 18px; text-align: center;">
-            <div style="font-size: 3rem; font-weight: 900; color: var(--accent-cyan-light);">{{ student_profile.gpa }}</div>
-            <div style="margin-top: 0.5rem; color: var(--text-muted);">Your current GPA</div>
+        <span class="badge badge-active">Auto-Updated</span>
+    </div>
+</div>
+{% endif %}
+
+{% if student_profile %}
+<!-- Student Personal Summary Widget -->
+<div class="card"
+    style="margin-bottom: 2rem; padding: 1.75rem; border: 1px solid rgba(6, 182, 212, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(10, 16, 32, 0.95));">
+    <div style="display: grid; gap: 1.5rem; grid-template-columns: 1fr 260px; align-items: center;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <h2 style="font-size: 1.45rem; margin-bottom: 0; font-weight: 800; color: #ffffff;">Personal Academic
+                    Record</h2>
+                <span class="badge"
+                    style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan-light); border: 1px solid rgba(6, 182, 212, 0.3);">
+                    {{ student_profile.student_code }}
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                Official academic summary.
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.9rem;">
+                <div style="background: rgba(255,255,255,0.04); padding: 0.65rem 0.85rem; border-radius: 10px;">
+                    <span style="color: var(--text-muted);">Department:</span> <strong style="color: #ffffff;">{{
+                        student_profile.department }}</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.04); padding: 0.65rem 0.85rem; border-radius: 10px;">
+                    <span style="color: var(--text-muted);">Institute/Faculty:</span> <strong style="color: #67e8f9;">{{
+                        student_profile.faculty }}</strong>
+                </div>
+                <div style="background: rgba(5, 78, 115, 0.04); padding: 0.65rem 0.85rem; border-radius: 10px;">
+                    <span style="color: var(--text-muted);">Academic Period:</span> <strong style="color: #fde68a;">{{
+                        student_profile.academic_period }}</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.04); padding: 0.65rem 0.85rem; border-radius: 10px;">
+                    <span style="color: var(--text-muted);">Status:</span>
+                    {% if student_profile.status == 'Graduated' %}
+                    <span class="badge badge-honors">🎓 Graduated</span>
+                    {% else %}
+                    <span class="badge badge-active">● Undergraduated</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div
+            style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(245, 158, 11, 0.15)); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(6, 182, 212, 0.3); text-align: center;">
+            <div
+                style="font-size: 3.2rem; font-weight: 900; color: var(--accent-cyan-light); font-family: 'Outfit', sans-serif; text-shadow: 0 0 20px rgba(6, 182, 212, 0.5);">
+                {{ "%.2f"|format(student_profile.gpa) }}
+            </div>
+            <div style="margin-top: 0.35rem; color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">Cum. Grade
+                Point Average</div>
+            <div style="font-size: 0.78rem; color: #4ade80; margin-top: 0.35rem;">Out of 4.0 Standard Scale</div>
         </div>
     </div>
-    <div style="margin-top: 1rem;">
-        <a href="{{ url_for('profile') }}" class="btn btn-primary">View My Profile & Report Card</a>
+    <div style="margin-top: 1.25rem;">
+        <a href="{{ url_for('profile') }}" class="btn btn-primary">📄 Download Full Grade Report Card</a>
     </div>
 </div>
 {% endif %}
 
 <!-- College Metrics Grid -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <!-- Metric 1: Scholars -->
-    <div class="card card-hover" style="margin: 0; padding: 1.5rem;">
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.3); background: rgba(15, 23, 42, 0.75);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.825rem; font-weight: 700; text-transform: uppercase;">Enrolled Scholars</span>
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(6, 182, 212, 0.18); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan-light); font-weight: 800;">
+            <span
+                style="color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Enrolled
+                Candidates</span>
+            <div
+                style="width: 40px; height: 40px; border-radius: 12px; background: rgba(6, 182, 212, 0.18); border: 1px solid rgba(6, 182, 212, 0.4); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan-light); font-size: 1.2rem;">
                 🎓
             </div>
         </div>
-        <div style="font-size: 2.35rem; font-weight: 900; margin-top: 0.75rem; color: var(--accent-cyan-light); font-family: 'Outfit', sans-serif;">{{ total_students }}</div>
-        <div style="font-size: 0.8rem; color: #4ade80; margin-top: 0.35rem; font-weight: 600;">Active Honors & Research Fellows</div>
+        <div
+            style="font-size: 2.5rem; font-weight: 900; margin-top: 0.75rem; color: var(--accent-cyan-light); font-family: 'Outfit', sans-serif;">
+            {{ total_students }}</div>
+        <div style="font-size: 0.8rem; color: #4ade80; margin-top: 0.35rem; font-weight: 600;">Active Undergraduates &
+            Graduates</div>
     </div>
 
-    <!-- Metric 2: Research Labs -->
-    <div class="card card-hover" style="margin: 0; padding: 1.5rem;">
+    <!-- Metric 2: Research Modules -->
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.5rem; border: 1px solid rgba(192, 132, 252, 0.3); background: rgba(15, 23, 42, 0.75);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.825rem; font-weight: 700; text-transform: uppercase;">Research Modules</span>
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(192, 132, 252, 0.18); display: flex; align-items: center; justify-content: center; color: #c084fc; font-weight: 800;">
-                🔬
+            <span
+                style="color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Accredited
+                Modules</span>
+            <div
+                style="width: 40px; height: 40px; border-radius: 12px; background: rgba(192, 132, 252, 0.18); border: 1px solid rgba(192, 132, 252, 0.4); display: flex; align-items: center; justify-content: center; color: #c084fc; font-size: 1.2rem;">
+                📚
             </div>
         </div>
-        <div style="font-size: 2.35rem; font-weight: 900; margin-top: 0.75rem; color: #c084fc; font-family: 'Outfit', sans-serif;">{{ total_subjects }}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">Accredited Advanced STEM Units</div>
+        <div
+            style="font-size: 2.5rem; font-weight: 900; margin-top: 0.75rem; color: #c084fc; font-family: 'Outfit', sans-serif;">
+            {{ total_subjects }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">Semester & Annual Courses</div>
     </div>
 
     <!-- Metric 3: Average Campus GPA -->
-    <div class="card card-hover" style="margin: 0; padding: 1.5rem;">
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(15, 23, 42, 0.75);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.825rem; font-weight: 700; text-transform: uppercase;">Campus Cum. GPA</span>
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245, 158, 11, 0.18); display: flex; align-items: center; justify-content: center; color: var(--accent-gold); font-weight: 800;">
+            <span
+                style="color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Campus
+                Cum. GPA</span>
+            <div
+                style="width: 40px; height: 40px; border-radius: 12px; background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: var(--accent-gold); font-size: 1.2rem;">
                 ⭐
             </div>
         </div>
-        <div style="font-size: 2.35rem; font-weight: 900; margin-top: 0.75rem; color: var(--accent-gold-light); font-family: 'Outfit', sans-serif;">{{ avg_gpa }}</div>
-        <div style="font-size: 0.8rem; color: #fbbf24; margin-top: 0.35rem; font-weight: 600;">Out of 4.0 Standard Scale</div>
+        <div
+            style="font-size: 2.5rem; font-weight: 900; margin-top: 0.75rem; color: var(--accent-gold-light); font-family: 'Outfit', sans-serif;">
+            {{ avg_gpa }}</div>
+        <div style="font-size: 0.8rem; color: #fbbf24; margin-top: 0.35rem; font-weight: 600;">Out of 4.0 Standard Scale
+        </div>
     </div>
 
-    <!-- Metric 4: ECTS Credits -->
-    <div class="card card-hover" style="margin: 0; padding: 1.5rem;">
+    <!-- Metric 4: Evaluations Issued -->
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.5rem; border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(15, 23, 42, 0.75);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.825rem; font-weight: 700; text-transform: uppercase;">Evaluations Issued</span>
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(52, 211, 153, 0.18); display: flex; align-items: center; justify-content: center; color: #34d399; font-weight: 800;">
+            <span
+                style="color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Evaluations
+                Issued</span>
+            <div
+                style="width: 40px; height: 40px; border-radius: 12px; background: rgba(52, 211, 153, 0.18); border: 1px solid rgba(52, 211, 153, 0.4); display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 1.2rem;">
                 📊
             </div>
         </div>
-        <div style="font-size: 2.35rem; font-weight: 900; margin-top: 0.75rem; color: #34d399; font-family: 'Outfit', sans-serif;">{{ total_grades }}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">Transcripts & Assessments</div>
+        <div
+            style="font-size: 2.5rem; font-weight: 900; margin-top: 0.75rem; color: #34d399; font-family: 'Outfit', sans-serif;">
+            {{ total_grades }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">Transcripts & Letter Grades</div>
     </div>
 
     <!-- Metric 5: System Accounts -->
-    <div class="card card-hover" style="margin: 0; padding: 1.5rem;">
+    <div class="card card-hover"
+        style="margin: 0; padding: 1.5rem; border: 1px solid rgba(59, 130, 246, 0.3); background: rgba(15, 23, 42, 0.75);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.825rem; font-weight: 700; text-transform: uppercase;">Faculty & Deans</span>
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(59, 130, 246, 0.18); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-weight: 800;">
+            <span
+                style="color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Faculty
+                Deans & Chairs</span>
+            <div
+                style="width: 40px; height: 40px; border-radius: 12px; background: rgba(59, 130, 246, 0.18); border: 1px solid rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.2rem;">
                 🏛️
             </div>
         </div>
-        <div style="font-size: 2.35rem; font-weight: 900; margin-top: 0.75rem; color: #60a5fa; font-family: 'Outfit', sans-serif;">{{ total_users }}</div>
-        <div style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 0.35rem;">Chairs & Department Deans</div>
+        <div
+            style="font-size: 2.5rem; font-weight: 900; margin-top: 0.75rem; color: #60a5fa; font-family: 'Outfit', sans-serif;">
+            {{ total_users }}</div>
+        <div style="font-size: 0.8rem; color: var(--accent-cyan-light); margin-top: 0.35rem;">Department Heads & Deans
+        </div>
+    </div>
+</div>
+
+<!-- College Institutes & Faculties Breakdown -->
+<div class="card"
+    style="margin-bottom: 2rem; padding: 1.75rem; border: 1px solid rgba(245, 158, 11, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(10, 16, 32, 0.98));">
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3
+                style="font-size: 1.25rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+                🏛️ College Faculties & Institutes
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Official constituent faculties and academic
+                programs configured in the system</p>
+        </div>
+        <span class="badge"
+            style="background: rgba(245, 158, 11, 0.15); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3);">
+            Faculty Programs
+        </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+        <!-- IOE -->
+        <div
+            style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); padding: 1.25rem; border-radius: 14px;">
+            <div style="font-weight: 800; color: #67e8f9; font-size: 1rem; margin-bottom: 0.35rem;">⚙️ Engineering Dept
+            </div>
+            <div style="font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 0.5rem;">Institute of
+                Engineering (IOE)</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;">
+                • B.E. Computer Engineering<br>
+                • B.E. Civil Engineering<br>
+                • B.E. Electrical & Mechanical<br>
+                • B.E. Electronics & Info Tech
+            </div>
+        </div>
+
+        <!-- IOM -->
+        <div
+            style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.25rem; border-radius: 14px;">
+            <div style="font-weight: 800; color: #fca5a5; font-size: 1rem; margin-bottom: 0.35rem;">⚕️ Medicine Dept
+            </div>
+            <div style="font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 0.5rem;">Institute of
+                Medicine (IOM)</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;">
+                • MBBS (Medicine & Surgery)<br>
+                • BDS (Dental Surgery)<br>
+                • B.Sc. Nursing & B.Pharm<br>
+                • B.Sc. Medical Lab Tech (MLT)
+            </div>
+        </div>
+
+        <!-- FOM -->
+        <div
+            style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1.25rem; border-radius: 14px;">
+            <div style="font-weight: 800; color: #fde68a; font-size: 1rem; margin-bottom: 0.35rem;">💼 Management Dept
+            </div>
+            <div style="font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 0.5rem;">Faculty of
+                Management (FOM)</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;">
+                • BBA (Business Admin)<br>
+                • BBM (Business Management)<br>
+                • BBS (Business Studies)<br>
+                • BHM & BIM Programs
+            </div>
+        </div>
+
+        <!-- IOST & FOHSS -->
+        <div
+            style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.3); padding: 1.25rem; border-radius: 14px;">
+            <div style="font-weight: 800; color: #c084fc; font-size: 1rem; margin-bottom: 0.35rem;">🔬 Sci & Humanities
+                Dept</div>
+            <div style="font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 0.5rem;">IOST & FOHSS</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;">
+                • B.Sc. CSIT (Computer Sci & IT)<br>
+                • B.Sc. Physics & Chemistry<br>
+                • B.Sc. Microbiology<br>
+                • BA (English & Sociology)
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Class Performance Meter & Recent Evaluations Grid -->
-<div style="display: grid; grid-template-columns: 1fr 350px; gap: 1.75rem; margin-bottom: 2rem;">
+<div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.75rem; margin-bottom: 2rem;">
     <!-- Recent Academic Evaluations Table -->
-    <div class="card" style="margin: 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div class="card" style="margin: 0; padding: 1.75rem;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
             <div>
-                <h3 style="font-weight: 800; font-size: 1.2rem;">Recent Research & Course Evaluations</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Official marks and letter grades submitted by SNS faculty chairs</p>
+                <h3 style="font-weight: 800; font-size: 1.2rem; color: #ffffff;">Recent Course Evaluations</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Marks percentage & letter grades verified by
+                    department deans</p>
             </div>
-            <a href="{{ url_for('grades') }}" style="color: var(--accent-cyan-light); text-decoration: none; font-size: 0.875rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
-                View All Evaluations &rarr;
+            <a href="{{ url_for('grades') }}"
+                style="color: var(--accent-cyan-light); text-decoration: none; font-size: 0.875rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+                View All Transcripts &rarr;
             </a>
         </div>
-        
+
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Scholar Name</th>
-                        <th>Research Module / Course</th>
+                        <th>Scholar Candidate</th>
+                        <th>Subject Module</th>
                         <th>Score %</th>
                         <th>Grade</th>
-                        <th>Academic Term</th>
+                        <th>Academic Session</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,11 +347,16 @@
                     <tr>
                         <td>
                             <div style="font-weight: 700; color: #ffffff;">{{ grade.student.full_name }}</div>
-                            <div style="font-size: 0.78rem; color: var(--accent-cyan-light); font-family: monospace;">{{ grade.student.student_code }} • {{ grade.student.grade_level }}</div>
+                            <div style="font-size: 0.78rem; color: var(--accent-cyan-light); font-family: monospace;">
+                                {{ grade.student.student_code }} • {{ grade.student.department }}
+                            </div>
                         </td>
                         <td>
-                            <div style="font-weight: 600;">{{ grade.subject.name }}</div>
-                            <span class="badge" style="background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan-light); font-size: 0.7rem; margin-top: 0.2rem; border: 1px solid rgba(6, 182, 212, 0.3);">{{ grade.subject.code }} • {{ grade.subject.credits }} ECTS Credits</span>
+                            <div style="font-weight: 600; color: #ffffff;">{{ grade.subject.name }}</div>
+                            <span class="badge"
+                                style="background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan-light); font-size: 0.7rem; margin-top: 0.2rem; border: 1px solid rgba(6, 182, 212, 0.3);">
+                                {{ grade.subject.code }} • {{ grade.subject.credits }} Credits
+                            </span>
                         </td>
                         <td style="font-weight: 800; color: #f8fafc;">{{ "%.1f"|format(grade.score) }}%</td>
                         <td><span class="badge badge-grade">{{ grade.display_letter_grade }}</span></td>
@@ -167,7 +364,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
                             No academic evaluation records found in the database.
                         </td>
                     </tr>
@@ -177,70 +374,69 @@
         </div>
     </div>
 
-    <!-- Class Analytics Progress Bar & Research Institutes -->
+    <!-- Analytics Progress Bar Widget -->
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <!-- Analytics Meter Widget -->
-        <div class="card" style="margin: 0; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(10, 16, 32, 0.95)); border-color: rgba(6, 182, 212, 0.35);">
+        <div class="card"
+            style="margin: 0; padding: 1.75rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(10, 16, 32, 0.98)); border-color: rgba(6, 182, 212, 0.35);">
             <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--accent-cyan-light);">
-                📊 Class Performance Analytics
+                📊 Grade Distribution Analytics
             </h3>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-                Aggregate grade distribution across all enrolled foreign scholars:
+                Aggregate grade performance metrics across all candidates:
             </p>
-            
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
+
+            <div style="display: flex; flex-direction: column; gap: 1.15rem;">
                 <div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 700; margin-bottom: 0.35rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 700; margin-bottom: 0.4rem;">
                         <span style="color: #6ee7b7;">A+ & A Distinction (90-100%)</span>
                         <span style="color: var(--accent-cyan-light);">72%</span>
                     </div>
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
-                        <div style="width: 72%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 10px;"></div>
+                    <div
+                        style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
+                        <div
+                            style="width: 72%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 10px;">
+                        </div>
                     </div>
                 </div>
 
                 <div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 700; margin-bottom: 0.35rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 700; margin-bottom: 0.4rem;">
                         <span style="color: #93c5fd;">A- & B+ High Merit (85-89%)</span>
                         <span style="color: var(--accent-cyan-light);">20%</span>
                     </div>
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
-                        <div style="width: 20%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 10px;"></div>
+                    <div
+                        style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
+                        <div
+                            style="width: 20%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 10px;">
+                        </div>
                     </div>
                 </div>
 
                 <div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 700; margin-bottom: 0.35rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 700; margin-bottom: 0.4rem;">
                         <span style="color: #fde68a;">B & Standard Pass (70-84%)</span>
                         <span style="color: var(--accent-cyan-light);">8%</span>
                     </div>
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
-                        <div style="width: 8%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 10px;"></div>
+                    <div
+                        style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
+                        <div
+                            style="width: 8%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 10px;">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Research Institutes List -->
-        <div class="card" style="margin: 0;">
-            <h3 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.75rem;">🏛️ Global STEM Institutes</h3>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
-                <li style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);">
-                    <span style="color: var(--accent-cyan);">⚡</span> School of Advanced AI & Neural Nets
-                </li>
-                <li style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);">
-                    <span style="color: var(--accent-cyan);">⚛️</span> Institute for Quantum Computing
-                </li>
-                <li style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);">
-                    <span style="color: var(--accent-cyan);">📈</span> High-Frequency Quantitative Trading Lab
-                </li>
-                <li style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);">
-                    <span style="color: var(--accent-cyan);">🧬</span> Genomic Medicine & Synthetic CRISPR
-                </li>
-                <li style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);">
-                    <span style="color: var(--accent-cyan);">🚀</span> Hypersonic Propulsion & Aerospace Lab
-                </li>
-            </ul>
+        <div class="card" style="margin: 0; padding: 1.5rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.75rem; color: #ffffff;">🏛️ Academic
+                Structure Details</h3>
+            <p style="font-size: 0.825rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                All degree programs, grading scales (4.0 GPA), and semester/annual course structures configured for
+                college standards.
+            </p>
         </div>
     </div>
 </div>

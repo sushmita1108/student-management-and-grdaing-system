@@ -28,7 +28,13 @@
 
         <div class="form-group">
             <label class="form-label" for="department">Department</label>
-            <input type="text" id="department" name="department" class="form-control" value="{{ academic_class.department if academic_class else '' }}" placeholder="Engineering, Medicine, Management, Science, Humanities" required>
+            <select id="department" name="department" class="form-control" required>
+                {% set dept_val = academic_class.department if academic_class else 'Engineering' %}
+                <option value="Engineering" {% if dept_val == 'Engineering' %}selected{% endif %}>Engineering</option>
+                <option value="Medicine" {% if dept_val == 'Medicine' %}selected{% endif %}>Medicine</option>
+                <option value="Management" {% if dept_val == 'Management' %}selected{% endif %}>Management</option>
+                <option value="Science and Humanities" {% if dept_val == 'Science and Humanities' %}selected{% endif %}>Science and Humanities</option>
+            </select>
         </div>
 
         <div class="form-group">

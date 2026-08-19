@@ -1,5 +1,7 @@
+# pyrefly: ignore [missing-import]
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+# pyrefly: ignore [missing-import]
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
@@ -31,11 +33,11 @@ class Student(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    grade_level = db.Column(db.String(20), nullable=False)
-    department = db.Column(db.String(80), default='General')
+    grade_level = db.Column(db.String(50), nullable=False)
+    department = db.Column(db.String(80), default='Engineering')
     faculty = db.Column(db.String(80), default='General')
     academic_period = db.Column(db.String(40), default='Semester 1')
-    status = db.Column(db.String(20), default='Active')
+    status = db.Column(db.String(20), default='Undergraduated')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     grades = db.relationship('Grade', backref='student', lazy=True, cascade='all, delete-orphan')
@@ -58,6 +60,8 @@ class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(20), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    department = db.Column(db.String(80), default='Engineering')
+    academic_period = db.Column(db.String(40), default='Semester 1')
     faculty = db.Column(db.String(80), default='General')
     level = db.Column(db.String(20), default='Bachelor')
     credits = db.Column(db.Integer, default=3)

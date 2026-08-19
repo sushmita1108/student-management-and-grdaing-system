@@ -46,45 +46,46 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="grade_level">Degree Program / Academic Track</label>
+                <label class="form-label" for="department">Department</label>
+                <select id="department" name="department" class="form-control" required onchange="syncGradeLevel(); populateFacultyOptions();">
+                    <option value="" disabled selected>Select Department</option>
+                    <option value="Engineering" {% if current_user.role == 'Department' and current_user.department == 'Engineering' %}selected{% endif %}>Engineering</option>
+                    <option value="Medicine" {% if current_user.role == 'Department' and current_user.department == 'Medicine' %}selected{% endif %}>Medicine</option>
+                    <option value="Management" {% if current_user.role == 'Department' and current_user.department == 'Management' %}selected{% endif %}>Management</option>
+                    <option value="Science and Humanities" {% if current_user.role == 'Department' and current_user.department == 'Science and Humanities' %}selected{% endif %}>Science and Humanities</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="grade_level">Grade Level / Academic Department</label>
                 <select id="grade_level" name="grade_level" class="form-control" required>
-                    <option value="" disabled selected>-- Select Academic Track --</option>
-                    <option value="+2 Science">+2 Science</option>
-                    <option value="+2 Management">+2 Management</option>
-                    <option value="B.Sc. CSIT">B.Sc. CSIT</option>
-                    <option value="BCA - Bachelor of Computer Application">BCA - Bachelor of Computer Application</option>
-                    <option value="BBA - Bachelor of Business Administration">BBA - Bachelor of Business Administration</option>
-                    <option value="M.Sc. Data Science">M.Sc. Data Science</option>
-                    <option value="M.Sc. Business Analytics">M.Sc. Business Analytics</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="faculty">Faculty</label>
-                <select id="faculty" name="faculty" class="form-control" required onchange="updateAcademicPeriodOptions()">
-                    <option value="" disabled selected>-- Select Faculty --</option>
-                    <option value="Science & Technology">Science & Technology</option>
+                    <option value="" disabled selected>-- Select Grade Level --</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Medicine">Medicine</option>
                     <option value="Management">Management</option>
-                    <option value="Humanities">Humanities</option>
-                    <option value="General">General</option>
+                    <option value="Science and Humanities">Science and Humanities</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="academic_period">Academic Period</label>
+                <label class="form-label" for="faculty">Faculty / Program</label>
+                <select id="faculty" name="faculty" class="form-control" required>
+                    <option value="" disabled selected>Select Faculty / Program</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="academic_period">Academic Period (Semester / Year)</label>
                 <select id="academic_period" name="academic_period" class="form-control" required>
-                    <option value="" disabled selected>-- Select Academic Period --</option>
+                    <option value="" disabled selected>Select Academic Period</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="status">Enrollment & Honors Distinction</label>
-                <select id="status" name="status" class="form-control">
-                    <option value="Active (Dean's Honor List)" selected>Active (Dean's Honor List)</option>
-                    <option value="Active (Summa Cum Laude)">Active (Summa Cum Laude)</option>
-                    <option value="Active (Magna Cum Laude)">Active (Magna Cum Laude)</option>
-                    <option value="Active (Presidential Scholar)">Active (Presidential Scholar)</option>
-                    <option value="On Research Leave">On International Research Exchange</option>
+                <label class="form-label" for="status">Academic Status</label>
+                <select id="status" name="status" class="form-control" required>
+                    <option value="Undergraduated" selected>Undergraduated</option>
+                    <option value="Graduated">Graduated</option>
                 </select>
             </div>
 
@@ -103,14 +104,50 @@ function generateScholarId() {
     const randomNum = Math.floor(90000 + Math.random() * 9999);
     document.getElementById('student_code').value = 'SNS-' + randomNum;
 }
+
+function syncGradeLevel() {
+    const dept = document.getElementById('department').value;
+    const gradeLevel = document.getElementById('grade_level');
+    if (dept) {
+        gradeLevel.value = dept;
+    }
+}
+
+const departmentFaculties = {
+    'Engineering': ['Institute of Engineering (IOE)', 'B.E. Computer Engineering', 'B.E. Civil Engineering', 'B.E. Electrical Engineering', 'B.E. Mechanical Engineering', 'B.E. Electronics & Communication'],
+    'Medicine': ['Institute of Medicine (IOM)', 'MBBS (Bachelor of Medicine & Surgery)', 'BDS (Bachelor of Dental Surgery)', 'B.Sc. Nursing', 'B.Pharm (Pharmacy)', 'B.Sc. MLT'],
+    'Management': ['Faculty of Management (FOM)', 'BBA (Bachelor of Business Administration)', 'BBM (Bachelor of Business Management)', 'BBS (Bachelor of Business Studies)', 'BHM (Bachelor of Hotel Management)', 'BIM (Bachelor of Information Management)'],
+    'Science and Humanities': ['Institute of Science and Technology (IOST)', 'Faculty of Humanities and Social Sciences (FOHSS)', 'B.Sc. CSIT (Computer Science & IT)', 'B.Sc. Physics', 'B.Sc. Chemistry', 'B.Sc. Microbiology', 'BA (Bachelor of Arts - English/Sociology)']
+};
+
+function populateFacultyOptions() {
+    const department = document.getElementById('department').value;
+    const facultySelect = document.getElementById('faculty');
+    const faculties = departmentFaculties[department] || [];
+
+    facultySelect.innerHTML = '<option value="" disabled selected>Select Faculty / Program</option>';
+    faculties.forEach(faculty => {
+        const option = document.createElement('option');
+        option.value = faculty;
+        option.textContent = faculty;
+        facultySelect.appendChild(option);
+    });
+
+    if (!faculties.includes(facultySelect.value)) {
+        facultySelect.value = '';
+    }
+
+    updateAcademicPeriodOptions();
+}
+
 function updateAcademicPeriodOptions() {
-    const faculty = document.getElementById('faculty').value;
+    const department = document.getElementById('department').value;
     const periodSelect = document.getElementById('academic_period');
     const engineeringPeriods = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'];
     const yearPeriods = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
-    const options = faculty === 'Engineering' ? engineeringPeriods : yearPeriods;
+    const options = department === 'Engineering' ? engineeringPeriods : yearPeriods;
 
-    periodSelect.innerHTML = '<option value="" disabled selected>-- Select Academic Period --</option>';
+    periodSelect.innerHTML = '<option value="" disabled selected>Select Academic Period</option>';
     options.forEach(period => {
         const option = document.createElement('option');
         option.value = period;
@@ -120,7 +157,13 @@ function updateAcademicPeriodOptions() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    updateAcademicPeriodOptions();
+    document.getElementById('department').addEventListener('change', function() {
+        syncGradeLevel();
+        populateFacultyOptions();
+    });
+    document.getElementById('faculty').addEventListener('change', updateAcademicPeriodOptions);
+    syncGradeLevel();
+    populateFacultyOptions();
 });
 </script>
 {% endblock %}
