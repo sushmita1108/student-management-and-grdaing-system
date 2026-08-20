@@ -22,7 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///ins
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SECURE'] =  os.getenv("FLASK_ENV") == "production"
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -1061,6 +1061,8 @@ def delete_grade(grade_id):
     flash('Grade deleted successfully.', 'info')
     return redirect(url_for('grades'))
 
-if __name__ == '__main__':
-    init_db_if_empty()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
