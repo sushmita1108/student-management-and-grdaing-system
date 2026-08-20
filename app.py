@@ -231,7 +231,6 @@ def init_db_if_empty():
                     subject.assigned_teacher_id = teacher_user.id
             db.session.commit()
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if g.user:
@@ -1061,8 +1060,5 @@ def delete_grade(grade_id):
     flash('Grade deleted successfully.', 'info')
     return redirect(url_for('grades'))
 
-import os
-
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000)
