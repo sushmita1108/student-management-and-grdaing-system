@@ -1061,7 +1061,4 @@ def delete_grade(grade_id):
     return redirect(url_for('grades'))
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        init_db_if_empty()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
