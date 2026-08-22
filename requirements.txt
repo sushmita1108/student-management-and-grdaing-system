@@ -4,3 +4,4 @@ Flask-WTF==1.2.2
 python-dotenv==1.0.1
 gunicorn
 MarkupSafe==2.1.3
+psycopg2-binary
