@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateResultPeriods() {
         const selectedStudent = studentSelect.selectedOptions[0];
         const department = selectedStudent ? selectedStudent.dataset.department : '';
-        const periods = department === 'Engineering'
+        const periods = ['Engineering', 'Management'].includes(department)
             ? Array.from({ length: 8 }, (_, index) => `Semester ${index + 1}`)
             : department
                 ? Array.from({ length: 5 }, (_, index) => `Year ${index + 1}`)

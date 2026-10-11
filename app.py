@@ -54,7 +54,7 @@ ANNUAL_TERMS = [f'Year {number}' for number in range(1, 6)]
 
 
 def academic_terms_for_department(department):
-    return ENGINEERING_TERMS if department == 'Engineering' else ANNUAL_TERMS
+    return ENGINEERING_TERMS if department in ['Engineering', 'Management'] else ANNUAL_TERMS
 
 @app.context_processor
 def inject_user():
