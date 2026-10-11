@@ -49,6 +49,12 @@ def load_logged_in_user():
         g.user = User.query.get(user_id)
 
 ROLE_CHOICES = ['Admin', 'Department', 'Teacher', 'Student']
+ENGINEERING_TERMS = [f'Semester {number}' for number in range(1, 9)]
+ANNUAL_TERMS = [f'Year {number}' for number in range(1, 6)]
+
+
+def academic_terms_for_department(department):
+    return ENGINEERING_TERMS if department == 'Engineering' else ANNUAL_TERMS
 
 @app.context_processor
 def inject_user():
@@ -1126,6 +1132,7 @@ def grades():
     department_filter = request.args.get('department', '').strip()
     faculty_filter = request.args.get('faculty', '').strip()
     status_filter = request.args.get('status', '').strip()
+    term_filter = request.args.get('term', '').strip()
 
     if request.method == 'POST':
         if g.user.role == 'Student':
@@ -1135,21 +1142,33 @@ def grades():
         student_id = request.form.get('student_id')
         subject_id = request.form.get('subject_id')
         score = float(request.form.get('score', 0))
-        term = request.form.get('term', 'Semester Exam 2082').strip()
+        term = request.form.get('term', '').strip()
 
         target_student = Student.query.get(student_id)
-        if not target_student:
-            flash('Selected student not found.', 'danger')
+        subject = Subject.query.get(subject_id)
+        if not target_student or not subject:
+            flash('Selected student or subject was not found.', 'danger')
             return redirect(url_for('grades'))
 
-        if g.user.role == 'Department' and target_student.department != g.user.department:
-            flash('You may only submit grades for students in your department.', 'danger')
+        if term not in academic_terms_for_department(target_student.department):
+            flash('Choose a result period that matches the student department.', 'danger')
+            return redirect(url_for('grades'))
+
+        if g.user.role == 'Department' and (
+                target_student.department != g.user.department
+                or subject.department != g.user.department
+                or (subject.faculty != 'General' and subject.faculty != target_student.faculty)):
+            flash('Student and subject must match your department and faculty.', 'danger')
             return redirect(url_for('grades'))
 
         if g.user.role == 'Teacher':
-            subject = Subject.query.filter_by(id=subject_id, assigned_teacher_id=g.user.id).first()
-            if not subject:
+            assigned_subject = Subject.query.filter_by(id=subject_id, assigned_teacher_id=g.user.id).first()
+            if not assigned_subject:
                 flash('You may only submit grades for your assigned subjects.', 'danger')
+                return redirect(url_for('grades'))
+            if (assigned_subject.department != target_student.department
+                    or (assigned_subject.faculty != 'General' and assigned_subject.faculty != target_student.faculty)):
+                flash('Student and assigned subject must match department and faculty.', 'danger')
                 return redirect(url_for('grades'))
 
         letter_grade, _ = Grade.calculate_letter_grade(score)
@@ -1179,7 +1198,8 @@ def grades():
         if status_filter in ['Undergraduated', 'Graduated']:
             student_query = student_query.filter_by(status=status_filter)
         student_ids = [student.id for student in student_query.all()]
-        all_grades = Grade.query.filter(Grade.student_id.in_(student_ids)).order_by(Grade.created_at.desc()).all() if student_ids else []
+        grades_query = Grade.query.filter(Grade.student_id.in_(student_ids)) if student_ids else None
+        all_grades = grades_query.order_by(Grade.created_at.desc()).all() if grades_query is not None else []
         all_students = student_query.order_by(Student.first_name).all()
         all_subjects = Subject.query.filter_by(department=dept).order_by(Subject.code).all()
         if not all_subjects:
@@ -1197,9 +1217,13 @@ def grades():
         if status_filter in ['Undergraduated', 'Graduated']:
             student_query = student_query.filter_by(status=status_filter)
         student_ids = [student.id for student in student_query.all()]
-        all_grades = Grade.query.filter(Grade.student_id.in_(student_ids)).order_by(Grade.created_at.desc()).all() if student_ids else []
+        grades_query = Grade.query.filter(Grade.student_id.in_(student_ids)) if student_ids else None
+        all_grades = grades_query.order_by(Grade.created_at.desc()).all() if grades_query is not None else []
         all_students = student_query.order_by(Student.department, Student.last_name, Student.first_name).all()
         all_subjects = Subject.query.order_by(Subject.department, Subject.code).all()
+
+    if term_filter:
+        all_grades = [grade for grade in all_grades if grade.term == term_filter]
 
     departments_query = db.session.query(Student.department).distinct()
     faculties_query = db.session.query(Student.faculty).distinct()
@@ -1210,6 +1234,12 @@ def grades():
         faculties_query = faculties_query.filter(Student.department == department_filter)
     departments = [row[0] for row in departments_query.order_by(Student.department).all() if row[0]]
     faculties = [row[0] for row in faculties_query.order_by(Student.faculty).all() if row[0]]
+    if g.user.role == 'Department':
+        available_terms = academic_terms_for_department(g.user.department)
+    elif department_filter:
+        available_terms = academic_terms_for_department(department_filter)
+    else:
+        available_terms = ENGINEERING_TERMS + ANNUAL_TERMS
 
     return render_template(
         'grades.html',
@@ -1220,7 +1250,9 @@ def grades():
         faculties=faculties,
         department_filter=department_filter,
         faculty_filter=faculty_filter,
-        status_filter=status_filter
+        status_filter=status_filter,
+        term_filter=term_filter,
+        available_terms=available_terms
     )
 
 @app.route('/profile')
@@ -1289,6 +1321,9 @@ def edit_grade(grade_id):
     if request.method == 'POST':
         score = float(request.form.get('score', grade.score))
         term = request.form.get('term', grade.term).strip()
+        if term not in academic_terms_for_department(grade.student.department):
+            flash('Choose a result period that matches the student department.', 'danger')
+            return redirect(url_for('edit_grade', grade_id=grade.id))
         grade.score = score
         grade.letter_grade, _ = Grade.calculate_letter_grade(score)
         grade.term = term
@@ -1296,7 +1331,11 @@ def edit_grade(grade_id):
         flash('Grade updated successfully.', 'success')
         return redirect(url_for('grades'))
 
-    return render_template('edit_grade.html', grade=grade)
+    return render_template(
+        'edit_grade.html',
+        grade=grade,
+        available_terms=academic_terms_for_department(grade.student.department)
+    )
 
 @app.route('/grades/delete/<int:grade_id>', methods=['POST'])
 @login_required

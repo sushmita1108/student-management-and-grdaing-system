@@ -50,10 +50,18 @@
     }
     .student-report-card { padding: 1.25rem; }
     @media (max-width: 760px) {
-        .student-profile-overview { grid-template-columns: 1fr; }
+        .student-profile-overview { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 0.55rem; }
+        .student-profile-card, .student-summary-card { padding: 0.8rem; }
+        .student-detail-grid { gap: 0.35rem 0.55rem; font-size: 0.73rem; }
+        .student-summary-grid { grid-template-columns: 1fr; gap: 0.35rem; }
+        .student-summary-metric { min-height: 52px; padding: 0.45rem 0.55rem; }
+        .student-summary-label { font-size: 0.62rem; }
+        .student-summary-value { margin-top: 0.2rem; font-size: 1rem; }
+        .student-summary-value[style] { font-size: 0.8rem !important; }
+        .student-report-card { padding: 0.8rem; }
     }
     @media (max-width: 480px) {
-        .student-detail-grid { grid-template-columns: 1fr; }
+        .student-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 </style>
 <div class="student-profile-page">

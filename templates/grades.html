@@ -30,7 +30,7 @@
                 <select id="student_id" name="student_id" class="form-control" required>
                     <option value="" disabled selected>-- Choose Candidate --</option>
                     {% for student in students %}
-                        <option value="{{ student.id }}">{{ student.full_name }} ({{ student.student_code }})</option>
+                        <option value="{{ student.id }}" data-department="{{ student.department }}">{{ student.full_name }} ({{ student.student_code }})</option>
                     {% endfor %}
                 </select>
             </div>
@@ -58,11 +58,9 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="term">Academic Term Session</label>
-                <select id="term" name="term" class="form-control">
-                    <option value="Fall Semester 2026" selected>Fall Semester 2026</option>
-                    <option value="Spring Semester 2027">Spring Semester 2027</option>
-                    <option value="Summer Research 2027">Summer Research 2027</option>
+                <label class="form-label" for="term">Result period</label>
+                <select id="term" name="term" class="form-control" required disabled>
+                    <option value="">Choose a student first</option>
                 </select>
             </div>
 
@@ -109,6 +107,15 @@
                     <option value="">All statuses</option>
                     <option value="Undergraduated" {% if status_filter == 'Undergraduated' %}selected{% endif %}>Enrolled</option>
                     <option value="Graduated" {% if status_filter == 'Graduated' %}selected{% endif %}>Graduated</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 0 1 170px; margin: 0;">
+                <label class="form-label" for="result-term">Result period</label>
+                <select id="result-term" name="term" class="form-control">
+                    <option value="">All periods</option>
+                    {% for term in available_terms %}
+                    <option value="{{ term }}" {% if term_filter == term %}selected{% endif %}>{{ term }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Filter results</button>
@@ -229,5 +236,28 @@ function calculateGradePreview(val) {
     letterSpan.textContent = letter;
     container.style.display = 'block';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const studentSelect = document.getElementById('student_id');
+    const termSelect = document.getElementById('term');
+    if (!studentSelect || !termSelect) return;
+
+    function updateResultPeriods() {
+        const selectedStudent = studentSelect.selectedOptions[0];
+        const department = selectedStudent ? selectedStudent.dataset.department : '';
+        const periods = department === 'Engineering'
+            ? Array.from({ length: 8 }, (_, index) => `Semester ${index + 1}`)
+            : department
+                ? Array.from({ length: 5 }, (_, index) => `Year ${index + 1}`)
+                : [];
+
+        termSelect.replaceChildren(new Option(periods.length ? 'Choose result period' : 'Choose a student first', ''));
+        periods.forEach(period => termSelect.add(new Option(period, period)));
+        termSelect.disabled = periods.length === 0;
+    }
+
+    studentSelect.addEventListener('change', updateResultPeriods);
+    updateResultPeriods();
+});
 </script>
 {% endblock %}

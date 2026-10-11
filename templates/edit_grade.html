@@ -29,8 +29,12 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="term">Session Term</label>
-            <input type="text" id="term" name="term" class="form-control" value="{{ grade.term }}" required>
+            <label class="form-label" for="term">Result period</label>
+            <select id="term" name="term" class="form-control" required>
+                {% for term in available_terms %}
+                <option value="{{ term }}" {% if grade.term == term %}selected{% endif %}>{{ term }}</option>
+                {% endfor %}
+            </select>
         </div>
 
         <div id="gradePreview" style="margin-top: 1rem; display: none;">

@@ -800,10 +800,18 @@
 
         @media (max-width: 760px) {
             body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; }
-            .sidebar { grid-column: 1; grid-row: 1; width: 100%; border-right: none; border-bottom: 1px solid var(--border-glass); padding: 1rem; }
+            .sidebar { grid-column: 1; grid-row: 1; display: block; width: 100%; border-right: none; border-bottom: 1px solid var(--border-glass); padding: 0.75rem; }
+            .university-brand { margin-bottom: 0.75rem; }
+            .world-rank-badge, .campus-pill, .nav-section-title { display: none; }
+            .nav-links { flex-direction: row; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.25rem; }
+            .nav-link { gap: 0.4rem; padding: 0.45rem 0.55rem; font-size: 0.74rem; }
+            .nav-link svg { width: 16px; height: 16px; }
+            .sidebar-footer { margin-top: 0.35rem; padding-top: 0.35rem; }
+            .user-profile-card { padding: 0.4rem 0.6rem; }
+            .user-avatar { width: 30px; height: 30px; }
             .main-wrapper { grid-column: 1; grid-row: 2; }
-            .topbar { padding: 0 1.25rem; }
-            .content-body { padding: 1.25rem; }
+            .topbar { min-height: 58px; height: auto; padding: 0.65rem 1rem; }
+            .content-body { padding: 0.9rem; }
         }
     </style>
 </head>
