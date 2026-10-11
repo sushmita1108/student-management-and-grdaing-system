@@ -17,8 +17,19 @@ from models import db, Student, Subject, Grade, User, AcademicClass
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-school-mgmt-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/school.db')
+is_vercel = os.getenv('VERCEL') == '1'
+secret_key = os.getenv('SECRET_KEY')
+database_url = os.getenv('DATABASE_URL', 'sqlite:///instance/school.db')
+if is_vercel and not secret_key:
+    raise RuntimeError('Set SECRET_KEY in the Vercel project environment variables.')
+if is_vercel and not database_url.startswith(('postgres://', 'postgresql://', 'postgresql+')):
+    raise RuntimeError('Set DATABASE_URL to a persistent PostgreSQL database in Vercel.')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql+psycopg://', 1)
+elif database_url.startswith('postgresql://'):
+    database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+app.config['SECRET_KEY'] = secret_key or 'dev-secret-key-school-mgmt-2026'
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -73,10 +84,11 @@ def init_db_if_empty():
 
         # Repair schema for the actual SQLite database used by SQLAlchemy.
         db_path = None
-        if getattr(db.engine.url, 'database', None):
-            db_path = db.engine.url.database
-        elif app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite:///'):
-            db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
+        if db.engine.dialect.name == 'sqlite':
+            if getattr(db.engine.url, 'database', None):
+                db_path = db.engine.url.database
+            elif app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite:///'):
+                db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
 
         need_schema_load = False
         if db_path:
@@ -155,71 +167,78 @@ def init_db_if_empty():
             db.session.commit()
 
         if User.query.count() == 0:
-            # Seed default SNS College admin, department heads, teacher, and student users
             admin_user = User(
                 username='admin',
                 email='admin@sns.edu.np',
                 full_name='Er. Sushmita Marasini',
                 role='Admin'
             )
-            admin_user.set_password('admin123')
+            if is_vercel:
+                initial_admin_password = os.getenv('INITIAL_ADMIN_PASSWORD')
+                if not initial_admin_password:
+                    raise RuntimeError('Set INITIAL_ADMIN_PASSWORD before initializing the Vercel database.')
+                admin_user.set_password(initial_admin_password)
+                db.session.add(admin_user)
+                db.session.commit()
+            else:
+                admin_user.set_password('admin123')
 
-            dept_eng = User(
-                username='eng_head',
-                email='dept_eng@sns.edu.np',
-                full_name='Er. Subash Rajkarnikar, Dean - Institute of Engineering (IOE)',
-                role='Department',
-                department='Engineering'
-            )
-            dept_eng.set_password('dept123')
+                dept_eng = User(
+                    username='eng_head',
+                    email='dept_eng@sns.edu.np',
+                    full_name='Er. Subash Rajkarnikar, Dean - Institute of Engineering (IOE)',
+                    role='Department',
+                    department='Engineering'
+                )
+                dept_eng.set_password('dept123')
 
-            dept_med = User(
-                username='med_head',
-                email='dept_med@sns.edu.np',
-                full_name='Dr. Anjali Sharma, Dean - Institute of Medicine (IOM)',
-                role='Department',
-                department='Medicine'
-            )
-            dept_med.set_password('dept123')
+                dept_med = User(
+                    username='med_head',
+                    email='dept_med@sns.edu.np',
+                    full_name='Dr. Anjali Sharma, Dean - Institute of Medicine (IOM)',
+                    role='Department',
+                    department='Medicine'
+                )
+                dept_med.set_password('dept123')
 
-            dept_mgmt = User(
-                username='mgmt_head',
-                email='dept_mgmt@sns.edu.np',
-                full_name='Prof. Bikram Thapa, Dean - Faculty of Management (FOM)',
-                role='Department',
-                department='Management'
-            )
-            dept_mgmt.set_password('dept123')
+                dept_mgmt = User(
+                    username='mgmt_head',
+                    email='dept_mgmt@sns.edu.np',
+                    full_name='Prof. Bikram Thapa, Dean - Faculty of Management (FOM)',
+                    role='Department',
+                    department='Management'
+                )
+                dept_mgmt.set_password('dept123')
 
-            dept_sh = User(
-                username='sh_head',
-                email='dept_sh@sns.edu.np',
-                full_name='Assoc. Prof. Sunita Shrestha, Dean - Institute of Science & Technology (IOST)',
-                role='Department',
-                department='Science and Humanities'
-            )
-            dept_sh.set_password('dept123')
+                dept_sh = User(
+                    username='sh_head',
+                    email='dept_sh@sns.edu.np',
+                    full_name='Assoc. Prof. Sunita Shrestha, Dean - Institute of Science & Technology (IOST)',
+                    role='Department',
+                    department='Science and Humanities'
+                )
+                dept_sh.set_password('dept123')
 
-            teacher_user = User(
-                username='teacher',
-                email='teacher@sns.edu.np',
-                full_name='Assoc. Prof. Sunita Shrestha',
-                role='Teacher',
-                department='Engineering'
-            )
-            teacher_user.set_password('teacher123')
+                teacher_user = User(
+                    username='teacher',
+                    email='teacher@sns.edu.np',
+                    full_name='Assoc. Prof. Sunita Shrestha',
+                    role='Teacher',
+                    department='Engineering'
+                )
+                teacher_user.set_password('teacher123')
 
-            student_user = User(
-                username='student',
-                email='student@sns.edu.np',
-                full_name='Aarav Sharma',
-                role='Student',
-                department='Engineering'
-            )
-            student_user.set_password('student123')
+                student_user = User(
+                    username='student',
+                    email='student@sns.edu.np',
+                    full_name='Aarav Sharma',
+                    role='Student',
+                    department='Engineering'
+                )
+                student_user.set_password('student123')
 
-            db.session.add_all([admin_user, dept_eng, dept_med, dept_mgmt, dept_sh, teacher_user, student_user])
-            db.session.commit()
+                db.session.add_all([admin_user, dept_eng, dept_med, dept_mgmt, dept_sh, teacher_user, student_user])
+                db.session.commit()
 
         # Assign a default set of subjects to the SNS College teacher account.
         teacher_user = User.query.filter_by(username='teacher').first()
@@ -1065,3 +1084,5 @@ if __name__ == "__main__":
         db.create_all()
         init_db_if_empty()
     app.run(host="0.0.0.0", port=5000)
+elif is_vercel:
+    init_db_if_empty()
