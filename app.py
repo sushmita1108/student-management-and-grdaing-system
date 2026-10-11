@@ -162,72 +162,64 @@ def init_db_if_empty():
                 full_name='Er. Sushmita Marasini',
                 role='Admin'
             )
-            if is_vercel:
-                initial_admin_password = os.getenv('INITIAL_ADMIN_PASSWORD')
-                if not initial_admin_password:
-                    raise RuntimeError('Set INITIAL_ADMIN_PASSWORD before initializing the Vercel database.')
-                admin_user.set_password(initial_admin_password)
-                db.session.add(admin_user)
-                db.session.commit()
-            else:
-                admin_user.set_password('admin123')
+            admin_user.set_password('admin123')
 
-                dept_eng = User(
-                    username='eng_head',
-                    email='dept_eng@sns.edu.np',
-                    full_name='Er. Subash Rajkarnikar, Dean - Institute of Engineering (IOE)',
-                    role='Department',
-                    department='Engineering'
-                )
-                dept_eng.set_password('dept123')
+            dept_eng = User(
+                username='eng_head',
+                email='dept_eng@sns.edu.np',
+                full_name='Er. Subash Rajkarnikar, Dean - Institute of Engineering (IOE)',
+                role='Department',
+                department='Engineering'
+            )
+            dept_eng.set_password('dept123')
 
-                dept_med = User(
-                    username='med_head',
-                    email='dept_med@sns.edu.np',
-                    full_name='Dr. Anjali Sharma, Dean - Institute of Medicine (IOM)',
-                    role='Department',
-                    department='Medicine'
-                )
-                dept_med.set_password('dept123')
+            dept_med = User(
+                username='med_head',
+                email='dept_med@sns.edu.np',
+                full_name='Dr. Anjali Sharma, Dean - Institute of Medicine (IOM)',
+                role='Department',
+                department='Medicine'
+            )
+            dept_med.set_password('dept123')
 
-                dept_mgmt = User(
-                    username='mgmt_head',
-                    email='dept_mgmt@sns.edu.np',
-                    full_name='Prof. Bikram Thapa, Dean - Faculty of Management (FOM)',
-                    role='Department',
-                    department='Management'
-                )
-                dept_mgmt.set_password('dept123')
+            dept_mgmt = User(
+                username='mgmt_head',
+                email='dept_mgmt@sns.edu.np',
+                full_name='Prof. Bikram Thapa, Dean - Faculty of Management (FOM)',
+                role='Department',
+                department='Management'
+            )
+            dept_mgmt.set_password('dept123')
 
-                dept_sh = User(
-                    username='sh_head',
-                    email='dept_sh@sns.edu.np',
-                    full_name='Assoc. Prof. Sunita Shrestha, Dean - Institute of Science & Technology (IOST)',
-                    role='Department',
-                    department='Science and Humanities'
-                )
-                dept_sh.set_password('dept123')
+            dept_sh = User(
+                username='sh_head',
+                email='dept_sh@sns.edu.np',
+                full_name='Assoc. Prof. Sunita Shrestha, Dean - Institute of Science & Technology (IOST)',
+                role='Department',
+                department='Science and Humanities'
+            )
+            dept_sh.set_password('dept123')
 
-                teacher_user = User(
-                    username='teacher',
-                    email='teacher@sns.edu.np',
-                    full_name='Assoc. Prof. Sunita Shrestha',
-                    role='Teacher',
-                    department='Engineering'
-                )
-                teacher_user.set_password('teacher123')
+            teacher_user = User(
+                username='teacher',
+                email='teacher@sns.edu.np',
+                full_name='Assoc. Prof. Sunita Shrestha',
+                role='Teacher',
+                department='Engineering'
+            )
+            teacher_user.set_password('teacher123')
 
-                student_user = User(
-                    username='student',
-                    email='student@sns.edu.np',
-                    full_name='Aarav Sharma',
-                    role='Student',
-                    department='Engineering'
-                )
-                student_user.set_password('student123')
+            student_user = User(
+                username='student',
+                email='student@sns.edu.np',
+                full_name='Aarav Sharma',
+                role='Student',
+                department='Engineering'
+            )
+            student_user.set_password('student123')
 
-                db.session.add_all([admin_user, dept_eng, dept_med, dept_mgmt, dept_sh, teacher_user, student_user])
-                db.session.commit()
+            db.session.add_all([admin_user, dept_eng, dept_med, dept_mgmt, dept_sh, teacher_user, student_user])
+            db.session.commit()
 
         # Assign a default set of subjects to the SNS College teacher account.
         teacher_user = User.query.filter_by(username='teacher').first()
