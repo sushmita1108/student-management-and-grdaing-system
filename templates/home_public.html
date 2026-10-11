@@ -1,0 +1,625 @@
+{% extends 'base.html' %}
+
+{% block title %}SNS College | Learning for What Comes Next{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+    :root {
+        --site-ink: #17231f;
+        --site-muted: #65716b;
+        --site-paper: #f5f4ee;
+        --site-white: #fffefa;
+        --site-green: #245947;
+        --site-green-dark: #163d31;
+        --site-lime: #d5ec8d;
+        --site-coral: #e77456;
+        --site-line: #dfe2d8;
+    }
+
+    body:has(.public-site) {
+        display: block;
+        min-height: 100vh;
+        color: var(--site-ink);
+        background: var(--site-paper);
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    body:has(.public-site)::before,
+    body:has(.public-site)::after {
+        display: none;
+    }
+
+    body:has(.public-site) .main-wrapper {
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    body:has(.public-site) .content-body {
+        padding: 0;
+        overflow: visible;
+    }
+
+    .public-site {
+        overflow: hidden;
+        background: var(--site-paper);
+    }
+
+    .public-site * {
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        min-height: 82px;
+        padding: 0 clamp(20px, 6vw, 88px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        background: var(--site-paper);
+        border-bottom: 1px solid var(--site-line);
+    }
+
+    .site-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--site-ink);
+        text-decoration: none;
+        flex: 0 0 auto;
+    }
+
+    .site-mark {
+        width: 46px;
+        height: 46px;
+        display: block;
+        flex: 0 0 auto;
+    }
+
+    .site-mark svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .site-brand-name {
+        display: block;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    .site-brand-note {
+        display: block;
+        margin-top: 2px;
+        color: var(--site-muted);
+        font-size: 11px;
+    }
+
+    .site-nav-links {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(16px, 2.8vw, 38px);
+    }
+
+    .site-nav-links a {
+        color: var(--site-ink);
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .site-nav-links a:hover,
+    .site-footer a:hover {
+        color: var(--site-green);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+
+    .site-nav-action,
+    .site-button {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0 19px;
+        border: 1px solid var(--site-green);
+        border-radius: 3px;
+        background: var(--site-green);
+        color: white;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .site-nav-action:hover,
+    .site-button:hover {
+        background: var(--site-green-dark);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .site-hero {
+        min-height: min(690px, calc(100svh - 82px));
+        min-height: max(540px, min(690px, calc(100svh - 82px)));
+        display: flex;
+        align-items: center;
+        position: relative;
+        isolation: isolate;
+        padding: 78px clamp(24px, 9vw, 132px) 104px;
+        color: white;
+        background: var(--site-green-dark);
+    }
+
+    .site-hero-image,
+    .site-hero-shade {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .site-hero-image {
+        object-fit: cover;
+        object-position: center 48%;
+        animation: campus-arrive 900ms ease-out both;
+    }
+
+    .site-hero-shade {
+        background: linear-gradient(90deg, rgba(15, 36, 29, 0.88) 0%, rgba(15, 36, 29, 0.69) 45%, rgba(15, 36, 29, 0.16) 100%), linear-gradient(0deg, rgba(13, 31, 25, 0.35), transparent 45%);
+    }
+
+    .site-hero-copy {
+        width: min(720px, 100%);
+        animation: copy-arrive 650ms 120ms ease-out both;
+    }
+
+    .site-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        color: var(--site-lime);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    .site-eyebrow::before {
+        width: 32px;
+        height: 1px;
+        background: currentColor;
+        content: '';
+    }
+
+    .site-hero h1 {
+        max-width: 690px;
+        margin: 0;
+        color: white;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(54px, 6.5vw, 86px);
+        font-weight: 500;
+        line-height: 1.02;
+        letter-spacing: 0;
+    }
+
+    .site-hero p {
+        max-width: 510px;
+        margin: 24px 0 30px;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .site-hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .site-button--light {
+        border-color: white;
+        background: white;
+        color: var(--site-ink);
+    }
+
+    .site-button--light:hover {
+        border-color: var(--site-lime);
+        background: var(--site-lime);
+        color: var(--site-ink);
+    }
+
+    .site-button--outline {
+        border-color: rgba(255, 255, 255, 0.72);
+        background: transparent;
+        color: white;
+    }
+
+    .site-button--outline:hover {
+        border-color: white;
+        background: white;
+        color: var(--site-ink);
+    }
+
+    .site-scroll-note {
+        position: absolute;
+        right: clamp(24px, 6vw, 88px);
+        bottom: 28px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .site-scroll-note::before {
+        width: 28px;
+        height: 1px;
+        background: var(--site-lime);
+        content: '';
+    }
+
+    .site-intro {
+        display: grid;
+        grid-template-columns: minmax(190px, 0.8fr) minmax(0, 1.7fr) minmax(180px, 0.7fr);
+        align-items: center;
+        gap: 32px;
+        padding: 40px clamp(24px, 9vw, 132px);
+        border-bottom: 1px solid var(--site-line);
+        background: var(--site-white);
+    }
+
+    .site-intro-label {
+        color: var(--site-green);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    .site-intro p {
+        margin: 0;
+        color: var(--site-ink);
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(20px, 2.2vw, 28px);
+        line-height: 1.4;
+    }
+
+    .site-intro-meta {
+        color: var(--site-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .site-section {
+        padding: 96px clamp(24px, 9vw, 132px);
+    }
+
+    .site-section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 30px;
+        margin-bottom: 34px;
+    }
+
+    .site-section-heading h2,
+    .site-about-copy h2,
+    .site-portal h2 {
+        margin: 8px 0 0;
+        color: var(--site-ink);
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(34px, 4vw, 50px);
+        font-weight: 500;
+        line-height: 1.1;
+        letter-spacing: 0;
+    }
+
+    .site-section-heading p {
+        max-width: 390px;
+        margin: 0;
+        color: var(--site-muted);
+        font-size: 14px;
+        line-height: 1.65;
+    }
+
+    .site-departments {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border-top: 1px solid var(--site-line);
+        border-bottom: 1px solid var(--site-line);
+    }
+
+    .site-department {
+        min-height: 282px;
+        padding: 27px 23px 30px;
+        border-right: 1px solid var(--site-line);
+        transition: background 180ms ease;
+    }
+
+    .site-department:first-child {
+        border-left: 1px solid var(--site-line);
+    }
+
+    .site-department:hover {
+        background: var(--site-white);
+    }
+
+    .site-department-number {
+        color: var(--site-coral);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .site-department h3 {
+        margin: 34px 0 10px;
+        color: var(--site-ink);
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 23px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .site-department p {
+        margin: 0;
+        color: var(--site-muted);
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .site-department-link {
+        display: inline-block;
+        margin-top: 22px;
+        color: var(--site-green);
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .site-about {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+        gap: clamp(36px, 8vw, 120px);
+        align-items: center;
+        background: #e9ede2;
+    }
+
+    .site-about-copy p {
+        max-width: 610px;
+        margin: 20px 0 26px;
+        color: var(--site-muted);
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .site-about-note {
+        padding: 28px;
+        border-left: 3px solid var(--site-coral);
+        background: rgba(255, 254, 250, 0.76);
+    }
+
+    .site-about-note strong {
+        display: block;
+        color: var(--site-green-dark);
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 25px;
+        font-weight: 500;
+    }
+
+    .site-about-note span {
+        display: block;
+        margin-top: 8px;
+        color: var(--site-muted);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .site-portal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+        padding-top: 64px;
+        padding-bottom: 64px;
+        background: var(--site-green-dark);
+    }
+
+    .site-portal h2 {
+        max-width: 620px;
+        color: white;
+        font-size: clamp(32px, 4vw, 46px);
+    }
+
+    .site-portal .site-eyebrow {
+        margin-bottom: 0;
+    }
+
+    .site-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 26px;
+        padding: 25px clamp(24px, 9vw, 132px);
+        background: #102d24;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 12px;
+    }
+
+    .site-footer strong {
+        color: white;
+    }
+
+    .site-footer a {
+        color: var(--site-lime);
+        text-decoration: none;
+    }
+
+    @keyframes copy-arrive {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes campus-arrive {
+        from { transform: scale(1.025); }
+        to { transform: scale(1); }
+    }
+
+    @media (max-width: 900px) {
+        .site-intro { grid-template-columns: 1fr 2fr; }
+        .site-intro-meta { grid-column: 2; }
+        .site-departments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .site-department:nth-child(3) { border-left: 1px solid var(--site-line); }
+        .site-department:nth-child(n+3) { border-top: 1px solid var(--site-line); }
+    }
+
+    @media (max-width: 640px) {
+        .site-nav { min-height: 72px; flex-wrap: wrap; gap: 12px; padding: 13px 20px; }
+        .site-brand-note { display: none; }
+        .site-nav-links { order: 3; width: 100%; justify-content: space-between; gap: 10px; padding: 7px 0 2px; }
+        .site-nav-links a { font-size: 12px; }
+        .site-nav-action { min-height: 40px; padding: 0 12px; font-size: 12px; }
+        .site-hero { min-height: max(500px, min(610px, calc(100svh - 200px))); padding: 62px 24px 92px; }
+        .site-hero-shade { background: linear-gradient(90deg, rgba(15, 36, 29, 0.87), rgba(15, 36, 29, 0.58)), linear-gradient(0deg, rgba(13, 31, 25, 0.5), transparent 60%); }
+        .site-hero h1 { font-size: 54px; }
+        .site-hero p { font-size: 14px; }
+        .site-scroll-note { right: 24px; bottom: 24px; }
+        .site-intro { grid-template-columns: 1fr; gap: 12px; padding: 30px 24px; }
+        .site-intro-meta { grid-column: auto; }
+        .site-section { padding: 66px 24px; }
+        .site-section-heading { display: block; }
+        .site-section-heading p { margin-top: 16px; }
+        .site-departments { grid-template-columns: 1fr; }
+        .site-department,
+        .site-department:first-child,
+        .site-department:nth-child(3) { min-height: 0; padding: 24px 18px; border: 0; border-top: 1px solid var(--site-line); }
+        .site-department h3 { margin-top: 22px; }
+        .site-about { grid-template-columns: 1fr; gap: 28px; }
+        .site-portal { align-items: flex-start; flex-direction: column; }
+        .site-footer { flex-direction: column; padding: 24px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .site-hero-image,
+        .site-hero-copy { animation: none; }
+        .site-button,
+        .site-department { transition: none; }
+    }
+</style>
+
+<div class="public-site">
+    <header class="site-nav">
+        <a class="site-brand" href="{{ url_for('home') }}" aria-label="SNS College home">
+            <span class="site-mark" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 2.5 44 10v14.2c0 10.1-8.2 17.5-20 21.3C12.2 41.7 4 34.3 4 24.2V10L24 2.5Z" fill="#245947"/>
+                    <path d="M12 17.5c4.2-1.1 8.2-.1 12 3 3.8-3.1 7.8-4.1 12-3v14c-4.4-1-8.4.2-12 3.5-3.6-3.3-7.6-4.5-12-3.5v-14Z" stroke="#fffefa" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M24 20.5v14.3M16 22l4 1.1M32 22l-4 1.1M19 28.5l3 1M29 28.5l-3 1" stroke="#d5ec8d" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="m24 7 1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5L24 7Z" fill="#d5ec8d"/>
+                </svg>
+            </span>
+            <span>
+                <span class="site-brand-name">SNS College</span>
+                <span class="site-brand-note">Learning for what comes next</span>
+            </span>
+        </a>
+        <nav class="site-nav-links" aria-label="Main navigation">
+            <a href="#college">The college</a>
+            <a href="#programmes">Programmes</a>
+            <a href="#contact">Contact</a>
+        </nav>
+        <a class="site-nav-action" href="{{ url_for('login') }}">Portal sign in <span aria-hidden="true">&rarr;</span></a>
+    </header>
+
+    <main>
+        <section class="site-hero" aria-labelledby="hero-title">
+            <img class="site-hero-image" src="https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&amp;fit=crop&amp;w=1800&amp;q=85" alt="University campus building">
+            <div class="site-hero-shade" aria-hidden="true"></div>
+            <div class="site-hero-copy">
+                <div class="site-eyebrow">A college for curious minds</div>
+                <h1 id="hero-title">SNS College</h1>
+                <p>Build a strong foundation, find your direction, and take your next step with a community committed to learning.</p>
+                <div class="site-hero-actions">
+                    <a class="site-button site-button--light" href="#programmes">Explore programmes <span aria-hidden="true">&rarr;</span></a>
+                    <a class="site-button site-button--outline" href="{{ url_for('login') }}">Student &amp; staff portal</a>
+                </div>
+            </div>
+            <div class="site-scroll-note">Discover SNS College</div>
+        </section>
+
+        <section class="site-intro" aria-label="SNS College introduction">
+            <div class="site-intro-label">Study with purpose</div>
+            <p>Practical knowledge. Thoughtful teaching. Room to grow.</p>
+            <div class="site-intro-meta">Explore study across engineering, health sciences, management, and the sciences.</div>
+        </section>
+
+        <section class="site-section" id="programmes">
+            <div class="site-section-heading">
+                <div>
+                    <div class="site-eyebrow">Find your field</div>
+                    <h2>Where will you begin?</h2>
+                </div>
+                <p>Explore academic areas built around rigorous study, applied learning, and the questions that move each field forward.</p>
+            </div>
+            <div class="site-departments">
+                <article class="site-department">
+                    <div class="site-department-number">01 / Engineering</div>
+                    <h3>Design what comes next.</h3>
+                    <p>Computer, civil, electrical, mechanical, and electronics engineering.</p>
+                    <a class="site-department-link" href="{{ url_for('register') }}">Explore study options &rarr;</a>
+                </article>
+                <article class="site-department">
+                    <div class="site-department-number">02 / Health sciences</div>
+                    <h3>Learn to make a difference.</h3>
+                    <p>Medicine, dentistry, nursing, pharmacy, and medical laboratory sciences.</p>
+                    <a class="site-department-link" href="{{ url_for('register') }}">Explore study options &rarr;</a>
+                </article>
+                <article class="site-department">
+                    <div class="site-department-number">03 / Management</div>
+                    <h3>Lead with perspective.</h3>
+                    <p>Business, management, information systems, and hospitality.</p>
+                    <a class="site-department-link" href="{{ url_for('register') }}">Explore study options &rarr;</a>
+                </article>
+                <article class="site-department">
+                    <div class="site-department-number">04 / Science &amp; humanities</div>
+                    <h3>Ask better questions.</h3>
+                    <p>Computer science, physical sciences, life sciences, and the liberal arts.</p>
+                    <a class="site-department-link" href="{{ url_for('register') }}">Explore study options &rarr;</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="site-section site-about" id="college">
+            <div class="site-about-copy">
+                <div class="site-eyebrow">The SNS experience</div>
+                <h2>Learning that connects ideas to action.</h2>
+                <p>SNS College brings students and educators together across a range of academic disciplines. Our aim is to make learning demanding, relevant, and connected to the world beyond the classroom.</p>
+                <a class="site-button" href="{{ url_for('register') }}">Join the college community <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <aside class="site-about-note">
+                <strong>One community.<br>Many directions.</strong>
+                <span>Find your academic path, connect with faculty, and keep your progress in view through the SNS College portal.</span>
+            </aside>
+        </section>
+
+        <section class="site-section site-portal" id="contact">
+            <div>
+                <div class="site-eyebrow">Your academic home</div>
+                <h2>Keep your college journey moving.</h2>
+            </div>
+            <a class="site-button site-button--light" href="{{ url_for('login') }}">Open the academic portal <span aria-hidden="true">&rarr;</span></a>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <span><strong>SNS College</strong> &nbsp; Learning for what comes next</span>
+        <span>Academic information &nbsp;·&nbsp; <a href="{{ url_for('login') }}">Portal sign in</a></span>
+    </footer>
+</div>
+{% endblock %}

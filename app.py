@@ -17,8 +17,15 @@ from models import db, Student, Subject, Grade, User, AcademicClass
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-school-mgmt-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/school.db')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or (
+    'dev-secret-key-school-mgmt-2026' if os.getenv('FLASK_ENV') != 'production' else None
+)
+database_url = os.getenv('DATABASE_URL', 'sqlite:///instance/school.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql+psycopg://', 1)
+elif database_url.startswith('postgresql://'):
+    database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -68,10 +75,12 @@ def login_required(f):
     return decorated_function
 
 def init_db_if_empty():
+    if os.getenv('FLASK_ENV') == 'production' and not app.config['SECRET_KEY']:
+        raise RuntimeError('Set SECRET_KEY before starting in production.')
+
     with app.app_context():
         db.create_all()
 
-        # Repair schema for the actual SQLite database used by SQLAlchemy.
         db_path = None
         if db.engine.dialect.name == 'sqlite':
             if getattr(db.engine.url, 'database', None):
@@ -151,11 +160,26 @@ def init_db_if_empty():
 
         # Check admin user name
         admin_acc = User.query.filter_by(username='admin').first()
-        if admin_acc and admin_acc.full_name != 'Er. Sushmita Marasini':
+        if (os.getenv('FLASK_ENV') != 'production' and admin_acc
+            and admin_acc.full_name != 'Er. Sushmita Marasini'):
             admin_acc.full_name = 'Er. Sushmita Marasini'
             db.session.commit()
 
-        if User.query.count() == 0:
+        if User.query.count() == 0 and os.getenv('FLASK_ENV') == 'production':
+            bootstrap_password = os.getenv('BOOTSTRAP_ADMIN_PASSWORD')
+            if not bootstrap_password:
+                raise RuntimeError('Set BOOTSTRAP_ADMIN_PASSWORD to create the first administrator.')
+            admin_user = User(
+                username=os.getenv('BOOTSTRAP_ADMIN_USERNAME', 'admin'),
+                email=os.getenv('BOOTSTRAP_ADMIN_EMAIL', 'admin@sns.edu.np'),
+                full_name=os.getenv('BOOTSTRAP_ADMIN_NAME', 'SNS College Administrator'),
+                role='Admin'
+            )
+            admin_user.set_password(bootstrap_password)
+            db.session.add(admin_user)
+            db.session.commit()
+
+        elif User.query.count() == 0:
             admin_user = User(
                 username='admin',
                 email='admin@sns.edu.np',
@@ -236,61 +260,48 @@ def login():
     if g.user:
         return redirect(url_for('dashboard'))
 
+    selected_role = request.form.get('role', '')
+    login_email = request.form.get('login_email', '').strip()
+
     if request.method == 'POST':
-        login_input = request.form.get('login_input', '').strip()
-        role = request.form.get('role', 'Student').strip().title()
-        department = request.form.get('department', '').strip()
+        role = selected_role.strip().title()
+        login_email = login_email.lower()
         password = request.form.get('password', '').strip()
         remember = request.form.get('remember')
 
-        login_input_lower = login_input.lower()
-
-        if '@' in login_input_lower and not login_input_lower.endswith('@sns.edu.np'):
-            flash('Please sign in with an SNS College email ending in @sns.edu.np, or use your username.', 'danger')
-            return render_template('login.html')
-
-        if not login_input or not password:
-            flash('Please provide both college email/username and password.', 'danger')
-            return render_template('login.html')
-
         if role not in ROLE_CHOICES:
-            flash('Please select a valid role for login.', 'danger')
-            return render_template('login.html')
+            flash('Please select your account role.', 'danger')
+        elif not login_email or not password:
+            flash('Enter your college email and password.', 'danger')
+        elif not login_email.endswith('@sns.edu.np'):
+            flash('Please use your SNS College email ending in @sns.edu.np.', 'danger')
+        else:
+            user = User.query.filter(
+                func.lower(User.email) == login_email,
+                User.role == role
+            ).first()
 
-        if role == 'Department' and not department:
-            flash('Please choose your department when logging in as Department Head.', 'danger')
-            return render_template('login.html')
+            if user and user.check_password(password):
+                csrf_val = session.get('_csrf_token')
+                session.clear()
+                if csrf_val:
+                    session['_csrf_token'] = csrf_val
+                session['user_id'] = user.id
+                if remember:
+                    session.permanent = True
+                flash(f'Welcome back, {user.full_name}!', 'success')
+                next_page = request.args.get('next')
+                if next_page and next_page.startswith('/'):
+                    return redirect(next_page)
+                return redirect(url_for('dashboard'))
 
-        user = User.query.filter(
-            (func.lower(User.email) == login_input_lower) |
-            (func.lower(User.username) == login_input_lower)
-        ).first()
+            flash('The selected role, email, or password is incorrect.', 'danger')
 
-        if user and user.check_password(password):
-            if user.role != role:
-                flash('The selected role does not match your account role.', 'danger')
-                return render_template('login.html')
-
-            if role == 'Department' and user.department and department and user.department != department:
-                flash('Selected department does not match your account department.', 'danger')
-                return render_template('login.html')
-
-            csrf_val = session.get('_csrf_token')
-            session.clear()
-            if csrf_val:
-                session['_csrf_token'] = csrf_val
-            session['user_id'] = user.id
-            if remember:
-                session.permanent = True
-            flash(f'Welcome back, {user.full_name}!', 'success')
-            next_page = request.args.get('next')
-            if next_page and next_page.startswith('/'):
-                return redirect(next_page)
-            return redirect(url_for('dashboard'))
-
-        flash('Invalid email/username or password.', 'danger')
-
-    return render_template('login.html')
+    return render_template(
+        'login.html',
+        selected_role=selected_role,
+        login_email=login_email
+    )
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -413,7 +424,7 @@ def logout():
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('home_public.html')
 
 @app.route('/dashboard')
 @login_required
@@ -517,18 +528,25 @@ def admin_assign_subjects():
 @app.route('/admin/manage-users')
 @login_required
 def admin_manage_users():
-    if g.user.role != 'Admin':
-        flash('Only administrators can manage user accounts.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can manage teacher accounts.', 'warning')
         return redirect(url_for('dashboard'))
 
-    users = User.query.filter(User.role != 'Admin').order_by(User.role, User.full_name).all()
-    return render_template('admin_manage_users.html', users=users)
+    users_query = User.query.filter_by(role='Teacher')
+    if g.user.role == 'Department':
+        users_query = users_query.filter_by(department=g.user.department)
+    users = users_query.order_by(User.full_name).all()
+    return render_template(
+        'admin_manage_users.html',
+        users=users,
+        managed_role='Teacher' if g.user.role == 'Department' else None
+    )
 
 @app.route('/admin/users/create', methods=['GET', 'POST'])
 @login_required
 def admin_create_user():
-    if g.user.role != 'Admin':
-        flash('Only administrators can create user accounts.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can create teacher accounts.', 'warning')
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
@@ -536,24 +554,28 @@ def admin_create_user():
         username = request.form.get('username', '').strip().lower()
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '').strip()
-        role = request.form.get('role', 'Student').strip().title()
+        role = request.form.get('role', 'Teacher').strip().title()
         department = request.form.get('department', '').strip()
+
+        if g.user.role == 'Department':
+            role = 'Teacher'
+            department = g.user.department
 
         if role not in ROLE_CHOICES:
             role = 'Student'
 
         if not all([full_name, username, email, password]):
             flash('All fields are required to create an account.', 'danger')
-            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES)
+            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
 
         if not email.endswith('@sns.edu.np'):
             flash('User email must end with @sns.edu.np.', 'danger')
-            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES)
+            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
 
         existing_user = User.query.filter((User.email == email) | (User.username == username)).first()
         if existing_user:
             flash('Username or email is already registered.', 'warning')
-            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES)
+            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
 
         new_user = User(
             full_name=full_name,
@@ -568,22 +590,33 @@ def admin_create_user():
         flash(f'User {full_name} has been created successfully.', 'success')
         return redirect(url_for('admin_manage_users'))
 
-    return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES)
+    return render_template(
+        'admin_edit_user.html',
+        user=None,
+        ROLE_CHOICES=['Teacher'] if g.user.role == 'Department' else ROLE_CHOICES,
+        managed_role='Teacher' if g.user.role == 'Department' else None
+    )
 
 @app.route('/admin/users/edit/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def admin_edit_user(user_id):
-    if g.user.role != 'Admin':
-        flash('Only administrators can edit user accounts.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can edit teacher accounts.', 'warning')
         return redirect(url_for('dashboard'))
 
     user = User.query.get_or_404(user_id)
+    if g.user.role == 'Department' and (user.role != 'Teacher' or user.department != g.user.department):
+        flash('You may only manage teachers in your department.', 'danger')
+        return redirect(url_for('admin_manage_users'))
     if request.method == 'POST':
         user.full_name = request.form.get('full_name', '').strip()
         user.username = request.form.get('username', '').strip().lower()
         user.email = request.form.get('email', '').strip().lower()
-        role = request.form.get('role', 'Student').strip().title()
+        role = request.form.get('role', 'Teacher').strip().title()
         user.department = request.form.get('department', '').strip() if role in ['Department', 'Teacher'] else 'General'
+        if g.user.role == 'Department':
+            role = 'Teacher'
+            user.department = g.user.department
         password = request.form.get('password', '').strip()
 
         if role not in ROLE_CHOICES:
@@ -592,16 +625,16 @@ def admin_edit_user(user_id):
 
         if not all([user.full_name, user.username, user.email]):
             flash('Full name, username, and email are required.', 'danger')
-            return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES)
+            return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
 
         if not user.email.endswith('@sns.edu.np'):
             flash('User email must end with @sns.edu.np.', 'danger')
-            return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES)
+            return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
 
         existing_account = User.query.filter((User.email == user.email) | (User.username == user.username)).filter(User.id != user.id).first()
         if existing_account:
             flash('Another account already uses that username or email.', 'warning')
-            return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES)
+            return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
 
         if password:
             user.set_password(password)
@@ -610,16 +643,24 @@ def admin_edit_user(user_id):
         flash('User details updated successfully.', 'success')
         return redirect(url_for('admin_manage_users'))
 
-    return render_template('admin_edit_user.html', user=user, ROLE_CHOICES=ROLE_CHOICES)
+    return render_template(
+        'admin_edit_user.html',
+        user=user,
+        ROLE_CHOICES=['Teacher'] if g.user.role == 'Department' else ROLE_CHOICES,
+        managed_role='Teacher' if g.user.role == 'Department' else None
+    )
 
 @app.route('/admin/users/delete/<int:user_id>', methods=['POST'])
 @login_required
 def admin_delete_user(user_id):
-    if g.user.role != 'Admin':
-        flash('Only administrators can delete user accounts.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can delete teacher accounts.', 'warning')
         return redirect(url_for('dashboard'))
 
     user = User.query.get_or_404(user_id)
+    if g.user.role == 'Department' and (user.role != 'Teacher' or user.department != g.user.department):
+        flash('You may only manage teachers in your department.', 'danger')
+        return redirect(url_for('admin_manage_users'))
     if user.role == 'Admin':
         flash('Cannot delete another admin account from this panel.', 'warning')
         return redirect(url_for('admin_manage_users'))
@@ -632,22 +673,35 @@ def admin_delete_user(user_id):
 @app.route('/admin/manage-subjects')
 @login_required
 def admin_manage_subjects():
-    if g.user.role != 'Admin':
-        flash('Only administrators can manage subjects.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can manage subjects.', 'warning')
         return redirect(url_for('dashboard'))
 
-    subjects = Subject.query.order_by(Subject.code).all()
-    teachers = User.query.filter_by(role='Teacher').order_by(User.full_name).all()
-    return render_template('admin_manage_subjects.html', subjects=subjects, teachers=teachers)
+    subjects_query = Subject.query
+    teachers_query = User.query.filter_by(role='Teacher')
+    if g.user.role == 'Department':
+        subjects_query = subjects_query.filter_by(department=g.user.department)
+        teachers_query = teachers_query.filter_by(department=g.user.department)
+    subjects = subjects_query.order_by(Subject.faculty, Subject.code).all()
+    teachers = teachers_query.order_by(User.full_name).all()
+    return render_template(
+        'admin_manage_subjects.html',
+        subjects=subjects,
+        teachers=teachers,
+        managed_department=g.user.department if g.user.role == 'Department' else None
+    )
 
 @app.route('/admin/subjects/create', methods=['GET', 'POST'])
 @login_required
 def admin_create_subject():
-    if g.user.role != 'Admin':
-        flash('Only administrators can create subjects.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can create subjects.', 'warning')
         return redirect(url_for('dashboard'))
 
-    teachers = User.query.filter_by(role='Teacher').order_by(User.full_name).all()
+    teachers_query = User.query.filter_by(role='Teacher')
+    if g.user.role == 'Department':
+        teachers_query = teachers_query.filter_by(department=g.user.department)
+    teachers = teachers_query.order_by(User.full_name).all()
     if request.method == 'POST':
         code = request.form.get('code', '').strip().upper()
         name = request.form.get('name', '').strip()
@@ -658,13 +712,22 @@ def admin_create_subject():
         credits = request.form.get('credits', 3)
         assigned_teacher_id = request.form.get('assigned_teacher_id')
 
+        if g.user.role == 'Department':
+            department = g.user.department
+
         if not all([code, name]):
             flash('Subject code and name are required.', 'danger')
             return render_template('admin_edit_subject.html', subject=None, teachers=teachers)
 
         if Subject.query.filter_by(code=code).first():
             flash('A subject with that code already exists.', 'warning')
-            return render_template('admin_edit_subject.html', subject=None, teachers=teachers)
+            return render_template('admin_edit_subject.html', subject=None, teachers=teachers, managed_department=g.user.department if g.user.role == 'Department' else None)
+
+        if assigned_teacher_id:
+            assigned_teacher = User.query.filter_by(id=assigned_teacher_id, role='Teacher', department=department).first()
+            if not assigned_teacher:
+                flash('Choose a teacher from the subject department.', 'danger')
+                return render_template('admin_edit_subject.html', subject=None, teachers=teachers, managed_department=g.user.department if g.user.role == 'Department' else None)
 
         subject = Subject(code=code, name=name, department=department, academic_period=academic_period, faculty=faculty, level=level, credits=int(credits))
         subject.assigned_teacher_id = int(assigned_teacher_id) if assigned_teacher_id else None
@@ -673,17 +736,29 @@ def admin_create_subject():
         flash('Subject created successfully.', 'success')
         return redirect(url_for('admin_manage_subjects'))
 
-    return render_template('admin_edit_subject.html', subject=None, teachers=teachers)
+    return render_template(
+        'admin_edit_subject.html',
+        subject=None,
+        teachers=teachers,
+        managed_department=g.user.department if g.user.role == 'Department' else None
+    )
 
 @app.route('/admin/subjects/edit/<int:subject_id>', methods=['GET', 'POST'])
 @login_required
 def admin_edit_subject(subject_id):
-    if g.user.role != 'Admin':
-        flash('Only administrators can edit subjects.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can edit subjects.', 'warning')
         return redirect(url_for('dashboard'))
 
     subject = Subject.query.get_or_404(subject_id)
-    teachers = User.query.filter_by(role='Teacher').order_by(User.full_name).all()
+    if g.user.role == 'Department' and subject.department != g.user.department:
+        flash('You may only manage subjects in your department.', 'danger')
+        return redirect(url_for('admin_manage_subjects'))
+
+    teachers_query = User.query.filter_by(role='Teacher')
+    if g.user.role == 'Department':
+        teachers_query = teachers_query.filter_by(department=g.user.department)
+    teachers = teachers_query.order_by(User.full_name).all()
     if request.method == 'POST':
         subject.code = request.form.get('code', '').strip().upper()
         subject.name = request.form.get('name', '').strip()
@@ -693,6 +768,8 @@ def admin_edit_subject(subject_id):
         subject.level = request.form.get('level', '').strip() or 'Bachelor'
         subject.credits = int(request.form.get('credits', subject.credits))
         assigned_teacher_id = request.form.get('assigned_teacher_id')
+        if g.user.role == 'Department':
+            subject.department = g.user.department
         subject.assigned_teacher_id = int(assigned_teacher_id) if assigned_teacher_id else None
 
         if not all([subject.code, subject.name]):
@@ -702,22 +779,40 @@ def admin_edit_subject(subject_id):
         existing_subject = Subject.query.filter(Subject.code == subject.code, Subject.id != subject.id).first()
         if existing_subject:
             flash('Another subject with that code already exists.', 'warning')
-            return render_template('admin_edit_subject.html', subject=subject, teachers=teachers)
+            return render_template('admin_edit_subject.html', subject=subject, teachers=teachers, managed_department=g.user.department if g.user.role == 'Department' else None)
+
+        if subject.assigned_teacher_id:
+            assigned_teacher = User.query.filter_by(
+                id=subject.assigned_teacher_id,
+                role='Teacher',
+                department=subject.department
+            ).first()
+            if not assigned_teacher:
+                flash('Choose a teacher from the subject department.', 'danger')
+                return render_template('admin_edit_subject.html', subject=subject, teachers=teachers, managed_department=g.user.department if g.user.role == 'Department' else None)
 
         db.session.commit()
         flash('Subject updated successfully.', 'success')
         return redirect(url_for('admin_manage_subjects'))
 
-    return render_template('admin_edit_subject.html', subject=subject, teachers=teachers)
+    return render_template(
+        'admin_edit_subject.html',
+        subject=subject,
+        teachers=teachers,
+        managed_department=g.user.department if g.user.role == 'Department' else None
+    )
 
 @app.route('/admin/subjects/delete/<int:subject_id>', methods=['POST'])
 @login_required
 def admin_delete_subject(subject_id):
-    if g.user.role != 'Admin':
-        flash('Only administrators can delete subjects.', 'warning')
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can delete subjects.', 'warning')
         return redirect(url_for('dashboard'))
 
     subject = Subject.query.get_or_404(subject_id)
+    if g.user.role == 'Department' and subject.department != g.user.department:
+        flash('You may only manage subjects in your department.', 'danger')
+        return redirect(url_for('admin_manage_subjects'))
     db.session.delete(subject)
     db.session.commit()
     flash('Subject deleted successfully.', 'info')
@@ -822,30 +917,51 @@ def admin_delete_class(class_id):
 @login_required
 def students():
     search_query = request.args.get('search', '').strip()
+    department_filter = request.args.get('department', '').strip()
+    faculty_filter = request.args.get('faculty', '').strip()
+    status_filter = request.args.get('status', '').strip()
+
     if g.user.role == 'Student':
-        student_list = Student.query.filter_by(email=g.user.email).all()
+        student_query = Student.query.filter_by(email=g.user.email)
     elif g.user.role == 'Department':
-        dept = g.user.department
-        if search_query:
-            student_list = Student.query.filter(
-                Student.department == dept,
-                (Student.first_name.ilike(f"%{search_query}%")) |
-                (Student.last_name.ilike(f"%{search_query}%")) |
-                (Student.student_code.ilike(f"%{search_query}%")) |
-                (Student.email.ilike(f"%{search_query}%"))
-            ).all()
-        else:
-            student_list = Student.query.filter_by(department=dept).all()
-    elif search_query:
-        student_list = Student.query.filter(
+        student_query = Student.query.filter_by(department=g.user.department)
+    else:
+        student_query = Student.query
+        if department_filter:
+            student_query = student_query.filter(Student.department == department_filter)
+
+    if status_filter in ['Undergraduated', 'Graduated']:
+        student_query = student_query.filter(Student.status == status_filter)
+    if faculty_filter:
+        student_query = student_query.filter(Student.faculty == faculty_filter)
+    if search_query:
+        student_query = student_query.filter(
             (Student.first_name.ilike(f"%{search_query}%")) |
             (Student.last_name.ilike(f"%{search_query}%")) |
             (Student.student_code.ilike(f"%{search_query}%")) |
             (Student.email.ilike(f"%{search_query}%"))
-        ).all()
-    else:
-        student_list = Student.query.all()
-    return render_template('students.html', students=student_list, search_query=search_query)
+        )
+
+    student_list = student_query.order_by(Student.department, Student.last_name, Student.first_name).all()
+    departments_query = db.session.query(Student.department).distinct()
+    faculties_query = db.session.query(Student.faculty).distinct()
+    if g.user.role == 'Department':
+        departments_query = departments_query.filter(Student.department == g.user.department)
+        faculties_query = faculties_query.filter(Student.department == g.user.department)
+    elif department_filter:
+        faculties_query = faculties_query.filter(Student.department == department_filter)
+    departments = [row[0] for row in departments_query.order_by(Student.department).all() if row[0]]
+    faculties = [row[0] for row in faculties_query.order_by(Student.faculty).all() if row[0]]
+    return render_template(
+        'students.html',
+        students=student_list,
+        search_query=search_query,
+        departments=departments,
+        faculties=faculties,
+        department_filter=department_filter,
+        faculty_filter=faculty_filter,
+        status_filter=status_filter
+    )
 
 @app.route('/students/add', methods=['GET', 'POST'])
 @login_required
@@ -900,14 +1016,29 @@ def add_student():
 @login_required
 def edit_student(id):
     student = Student.query.get_or_404(id)
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can edit student records.', 'warning')
+        return redirect(url_for('students'))
     if g.user.role == 'Department' and student.department != g.user.department:
         flash('You are only authorized to manage students in your department.', 'danger')
         return redirect(url_for('students'))
 
     if request.method == 'POST':
+        student_code = request.form.get('student_code', '').strip()
         student.first_name = request.form.get('first_name', '').strip()
         student.last_name = request.form.get('last_name', '').strip()
         student.email = request.form.get('email', '').strip()
+        if not student_code or not student.first_name or not student.last_name or not student.email:
+            flash('Student code, name, and email are required.', 'danger')
+            return render_template('edit_student.html', student=student)
+        duplicate = Student.query.filter(
+            Student.id != student.id,
+            (Student.student_code == student_code) | (Student.email == student.email)
+        ).first()
+        if duplicate:
+            flash('Another student already uses that code or email.', 'danger')
+            return render_template('edit_student.html', student=student)
+        student.student_code = student_code
         if g.user.role != 'Department':
             student.department = request.form.get('department', student.department).strip() or 'Engineering'
         student.grade_level = student.department
@@ -926,6 +1057,9 @@ def edit_student(id):
 @login_required
 def delete_student(id):
     student = Student.query.get_or_404(id)
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Only administrators and department heads can remove student records.', 'warning')
+        return redirect(url_for('students'))
     if g.user.role == 'Department' and student.department != g.user.department:
         flash('You are only authorized to manage students in your department.', 'danger')
         return redirect(url_for('students'))
@@ -1027,6 +1161,34 @@ def profile():
     total_credits = sum(item['credits'] for item in report_cards)
     return render_template('student_profile.html', student=student_profile, grades=grades, report_cards=report_cards, total_credits=total_credits)
 
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if g.user.role not in ['Admin', 'Department']:
+        flash('Password self-service is available to administrators and department heads.', 'warning')
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if not g.user.check_password(current_password):
+            flash('Current password is incorrect.', 'danger')
+        elif len(new_password) < 8:
+            flash('New password must be at least 8 characters long.', 'warning')
+        elif new_password != confirm_password:
+            flash('New password and confirmation do not match.', 'danger')
+        elif current_password == new_password:
+            flash('Choose a new password different from your current password.', 'warning')
+        else:
+            g.user.set_password(new_password)
+            db.session.commit()
+            flash('Your password has been changed successfully.', 'success')
+            return redirect(url_for('dashboard'))
+
+    return render_template('change_password.html')
+
 @app.route('/grades/edit/<int:grade_id>', methods=['GET', 'POST'])
 @login_required
 def edit_grade(grade_id):
@@ -1061,7 +1223,9 @@ def delete_grade(grade_id):
     return redirect(url_for('grades'))
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        init_db_if_empty()
-    app.run(host="0.0.0.0", port=5000)
+    init_db_if_empty()
+    app.run(
+        host=os.getenv('HOST', '0.0.0.0'),
+        port=int(os.getenv('PORT', '5000')),
+        debug=False
+    )

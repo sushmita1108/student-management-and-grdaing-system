@@ -3,11 +3,127 @@
 {% block title %}Sign In | SNS College{% endblock %}
 
 {% block content %}
-<div style="min-height: calc(100vh - 160px); display: flex; align-items: center; justify-content: center;">
+<style>
+    body:has(.login-page) {
+        background: #f5f4ee;
+        color: #17231f;
+    }
+
+    body:has(.login-page)::before,
+    body:has(.login-page)::after {
+        display: none;
+    }
+
+    body:has(.login-page) .content-body {
+        padding: 0;
+        background: #f5f4ee;
+    }
+
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(2rem, 6vh, 4rem) 1rem;
+        color: #17231f;
+        background-image: linear-gradient(110deg, rgba(17, 55, 41, 0.76), rgba(17, 55, 41, 0.46)), url("https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85");
+        background-size: cover;
+        background-position: center;
+    }
+
+    .login-page h1 {
+        background: none !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .login-page p[style*="accent-gold"] {
+        color: #e4f4bf !important;
+    }
+
+    .login-page > div > div:first-child p:last-child {
+        color: #ffffff !important;
+    }
+
+    .login-page .login-crest {
+        background: #245947 !important;
+        border: 1px solid #d5ec8d !important;
+        border-radius: 50% !important;
+        box-shadow: 0 8px 24px rgba(36, 89, 71, 0.2) !important;
+    }
+
+    .login-page .card {
+        background: #fffefa;
+        border-color: #dfe2d8 !important;
+        box-shadow: 0 16px 40px rgba(23, 35, 31, 0.08);
+    }
+
+    .login-page .form-label {
+        color: #263b32;
+    }
+
+    .login-page .form-control {
+        background-color: #ffffff;
+        border-color: #cbd5ca;
+        color: #17231f;
+    }
+
+    .login-page .form-control:focus {
+        border-color: #478267;
+        box-shadow: 0 0 0 3px rgba(71, 130, 103, 0.16);
+    }
+
+    .login-page .form-control::placeholder {
+        color: #7b8980;
+    }
+
+    .login-page .btn-secondary {
+        background: #ffffff;
+        border-color: #cbd8c8;
+        color: #245947;
+    }
+
+    .login-page .btn-secondary:hover {
+        background: #e7efdf;
+        border-color: #8eaa91;
+        color: #163d31;
+    }
+
+    .login-page .btn-primary {
+        background: #245947 !important;
+        box-shadow: 0 4px 18px rgba(36, 89, 71, 0.2) !important;
+    }
+
+    .login-page .btn-primary:hover {
+        background: #163d31 !important;
+    }
+
+    .login-page .signup-link {
+        color: #245947 !important;
+    }
+
+    .login-page .account-role-note {
+        margin-top: 0.5rem;
+        color: #607268;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    .login-page [hidden] {
+        display: none !important;
+    }
+
+    @media (max-width: 640px) {
+        .login-page {
+            padding: 2rem 1rem;
+        }
+    }
+</style>
+<div class="login-page">
     <div style="width: 100%; max-width: 450px;">
         <!-- SNS College Crest Badge Header -->
         <div style="text-align: center; margin-bottom: 2rem;">
-            <div style="width: 68px; height: 68px; background: linear-gradient(135deg, #06b6d4, #2563eb); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.6rem; font-family: 'Outfit', sans-serif; box-shadow: 0 8px 32px rgba(6, 182, 212, 0.45); margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.25);">
+            <div class="login-crest" style="width: 68px; height: 68px; background: linear-gradient(135deg, #06b6d4, #2563eb); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.6rem; font-family: 'Outfit', sans-serif; box-shadow: 0 8px 32px rgba(6, 182, 212, 0.45); margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.25);">
                 SNS
             </div>
             <h1 style="font-size: 1.85rem; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(135deg, #ffffff, #67e8f9); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
@@ -17,85 +133,49 @@
                 College Email Access for all Roles
             </p>
             <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.35rem;">
-                Students and staff can register first, then sign in with their SNS College email ending in @sns.edu.np or their username.
+                Select your role to show the email and password fields.
             </p>
         </div>
 
         <div class="card" style="padding: 2.25rem; border-color: rgba(6, 182, 212, 0.35);">
-            <!-- 1-Click Quick Fill Helper Pill Buttons -->
-            <div style="background: rgba(10, 16, 32, 0.85); border: 1px solid var(--border-cyan); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
-                <div style="font-size: 0.78rem; font-weight: 800; color: var(--accent-cyan-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
-                    ⚡ Quick Demo Sign In:
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('admin@sns.edu.np', 'admin123', 'Admin', '')" style="font-size: 0.75rem;">
-                        👤 Admin (Er. Sushmita)
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_eng@sns.edu.np', 'dept123', 'Department', 'Engineering')" style="font-size: 0.75rem;">
-                        🏛️ Head: Engineering
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_med@sns.edu.np', 'dept123', 'Department', 'Medicine')" style="font-size: 0.75rem;">
-                        ⚕️ Head: Medicine
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_mgmt@sns.edu.np', 'dept123', 'Department', 'Management')" style="font-size: 0.75rem;">
-                        💼 Head: Management
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('dept_sh@sns.edu.np', 'dept123', 'Department', 'Science and Humanities')" style="font-size: 0.75rem;">
-                        🔬 Head: Sci & Hum
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="fillCredentials('teacher@sns.edu.np', 'teacher123', 'Teacher', '')" style="font-size: 0.75rem;">
-                        🎓 Lecturer
-                    </button>
-                </div>
-            </div>
-
             <form method="POST" action="{{ url_for('login') }}">
                 {{ csrf_field() }}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label class="form-label" for="login_input">College Email or Username</label>
-                        <input type="text" id="login_input" name="login_input" class="form-control" placeholder="e.g. admin@sns.edu.np" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="role">Select Role</label>
-                        <select id="role" name="role" class="form-control" required onchange="toggleDepartmentField()">
-                            <option value="Student">Student</option>
-                            <option value="Teacher">Lecturer / Faculty</option>
-                            <option value="Department">Department Head</option>
-                            <option value="Admin" selected>Campus Admin</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" id="department-field" style="display: none;">
-                    <label class="form-label" for="department">Department</label>
-                    <select id="department" name="department" class="form-control">
-                        <option value="" selected>Choose Department</option>
-                        <option value="Engineering">Engineering</option>
-                        <option value="Medicine">Medicine</option>
-                        <option value="Management">Management</option>
-                        <option value="Science and Humanities">Science and Humanities</option>
+                <div class="form-group">
+                    <label class="form-label" for="role">Select your role</label>
+                    <select id="role" name="role" class="form-control" required>
+                        <option value="">Choose your role</option>
+                        <option value="Student" {% if selected_role == 'Student' %}selected{% endif %}>Student</option>
+                        <option value="Teacher" {% if selected_role == 'Teacher' %}selected{% endif %}>Teacher / Faculty</option>
+                        <option value="Department" {% if selected_role == 'Department' %}selected{% endif %}>Department Head</option>
+                        <option value="Admin" {% if selected_role == 'Admin' %}selected{% endif %}>Campus Admin</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
-                </div>
+                <div id="login-credentials" {% if not selected_role %}hidden{% endif %}>
+                    <div class="form-group">
+                        <label class="form-label" for="login_email">SNS College email</label>
+                        <input type="email" id="login_email" name="login_email" class="form-control" value="{{ login_email }}" placeholder="name@sns.edu.np" autocomplete="username" required>
+                    </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); cursor: pointer;">
-                        <input type="checkbox" name="remember" style="accent-color: var(--accent-cyan);"> Remember Session
-                    </label>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
-                    Sign In to Portal &rarr;
-                </button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); cursor: pointer;">
+                            <input type="checkbox" name="remember" style="accent-color: #245947;"> Remember Session
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
+                        Sign In to Portal &rarr;
+                    </button>
+                </div>
             </form>
 
             <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-glass); font-size: 0.875rem; color: var(--text-muted);">
-                New student or staff? <a href="{{ url_for('register') }}" style="color: var(--accent-cyan-light); font-weight: 700; text-decoration: none;">Create an SNS College account</a>
+                New student or staff? <a class="signup-link" href="{{ url_for('register') }}" style="color: var(--accent-cyan-light); font-weight: 700; text-decoration: none;">Create an SNS College account</a>
             </div>
         </div>
     </div>
@@ -104,33 +184,13 @@
 
 {% block extra_js %}
 <script>
-function fillCredentials(email, pass, role, dept) {
-    document.getElementById('login_input').value = email;
-    document.getElementById('password').value = pass;
-    if (role) {
-        document.getElementById('role').value = role;
-        toggleDepartmentField();
-    }
-    if (dept) {
-        document.getElementById('department').value = dept;
-    }
-}
-function toggleDepartmentField() {
-    const roleSelect = document.getElementById('role');
-    const departmentBlock = document.getElementById('department-field');
-    const departmentSelect = document.getElementById('department');
-    if (roleSelect.value === 'Department') {
-        departmentBlock.style.display = 'block';
-        departmentSelect.setAttribute('required', 'required');
-    } else {
-        departmentBlock.style.display = 'none';
-        departmentSelect.removeAttribute('required');
-        departmentSelect.value = '';
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    toggleDepartmentField();
+    const roleSelect = document.getElementById('role');
+    const credentials = document.getElementById('login-credentials');
+
+    roleSelect.addEventListener('change', function() {
+        credentials.hidden = !roleSelect.value;
+    });
 });
 </script>
 {% endblock %}

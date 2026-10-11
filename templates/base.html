@@ -10,31 +10,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #050814;
-            --bg-canvas: #090e1a;
-            --bg-surface: rgba(15, 23, 42, 0.75);
-            --bg-card: rgba(20, 30, 55, 0.8);
-            --bg-card-hover: rgba(30, 45, 80, 0.9);
-            --border-glass: rgba(255, 255, 255, 0.12);
-            --border-cyan: rgba(6, 182, 212, 0.35);
-            --border-gold: rgba(245, 158, 11, 0.35);
-            
-            --accent-cyan: #06b6d4;
-            --accent-cyan-light: #67e8f9;
-            --accent-gold: #f59e0b;
-            --accent-gold-light: #fbbf24;
-            --accent-blue: #3b82f6;
-            --accent-emerald: #10b981;
-            --accent-purple: #8b5cf6;
+            --bg-deep: #f5f4ee;
+            --bg-canvas: #f5f7f1;
+            --bg-surface: #fffefa;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f6ee;
+            --border-glass: #dfe5da;
+            --border-cyan: rgba(36, 89, 71, 0.24);
+            --border-gold: rgba(36, 89, 71, 0.22);
+
+            --accent-cyan: #245947;
+            --accent-cyan-light: #245947;
+            --accent-gold: #3c7659;
+            --accent-gold-light: #245947;
+            --accent-blue: #478267;
+            --accent-emerald: #3c7659;
+            --accent-purple: #478267;
             --accent-rose: #f43f5e;
 
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --text-dim: #64748b;
-            
-            --shadow-glass: 0 20px 50px 0 rgba(0, 0, 0, 0.55);
-            --shadow-cyan-glow: 0 0 30px rgba(6, 182, 212, 0.2);
-            --shadow-gold-glow: 0 0 30px rgba(245, 158, 11, 0.2);
+            --text-main: #20372c;
+            --text-muted: #65766b;
+            --text-dim: #728176;
+
+            --shadow-glass: 0 14px 36px rgba(32, 55, 44, 0.08);
+            --shadow-cyan-glow: 0 8px 22px rgba(36, 89, 71, 0.12);
+            --shadow-gold-glow: 0 8px 22px rgba(36, 89, 71, 0.1);
             --radius-lg: 18px;
             --radius-md: 12px;
             --radius-sm: 8px;
@@ -613,6 +613,185 @@
         .flash-danger { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); color: #fca5a5; }
         .flash-info { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: #93c5fd; }
 
+        body:not(:has(.public-site)) {
+            background: #f5f4ee;
+            color: #20372c;
+        }
+
+        body:not(:has(.public-site)) .sidebar,
+        body:not(:has(.public-site)) .topbar {
+            background: #fffefa;
+            border-color: #dfe5da;
+            box-shadow: 0 8px 24px rgba(32, 55, 44, 0.06);
+        }
+
+        body:not(:has(.public-site)) .content-body {
+            background: #f5f7f1;
+            color: #20372c;
+        }
+
+        body:not(:has(.public-site)) .brand-name {
+            background: none;
+            color: #163d31;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        body:not(:has(.public-site)) .brand-sub,
+        body:not(:has(.public-site)) .user-role-badge {
+            color: #3c7659;
+        }
+
+        body:not(:has(.public-site)) .crest-icon,
+        body:not(:has(.public-site)) .user-avatar {
+            background: #245947;
+            box-shadow: 0 5px 16px rgba(36, 89, 71, 0.18);
+        }
+
+        body:not(:has(.public-site)) .world-rank-badge,
+        body:not(:has(.public-site)) .campus-pill,
+        body:not(:has(.public-site)) .portal-tag {
+            background: #edf3e9;
+            border-color: #d4e0d0;
+            color: #245947;
+        }
+
+        body:not(:has(.public-site)) .nav-section-title,
+        body:not(:has(.public-site)) .nav-link,
+        body:not(:has(.public-site)) .topbar-title-section span[style*="text-dim"] {
+            color: #65766b;
+        }
+
+        body:not(:has(.public-site)) .nav-link:hover,
+        body:not(:has(.public-site)) .nav-link.active {
+            background: #edf3e9;
+            border-color: #d4e0d0;
+            color: #163d31;
+            box-shadow: none;
+        }
+
+        body:not(:has(.public-site)) .nav-link.active svg {
+            color: #245947;
+        }
+
+        body:not(:has(.public-site)) .user-profile-card {
+            background: #f5f7f1;
+            border-color: #dfe5da;
+        }
+
+        body:not(:has(.public-site)) .user-name,
+        body:not(:has(.public-site)) h1,
+        body:not(:has(.public-site)) h2,
+        body:not(:has(.public-site)) h3,
+        body:not(:has(.public-site)) h4,
+        body:not(:has(.public-site)) .page-title {
+            color: #163d31 !important;
+            background: none !important;
+            -webkit-text-fill-color: currentColor !important;
+        }
+
+        body:not(:has(.public-site)) .card {
+            background: #fffefa !important;
+            border-color: #dfe5da !important;
+            box-shadow: 0 12px 30px rgba(32, 55, 44, 0.07);
+            color: #20372c;
+        }
+
+        body:not(:has(.public-site)) .card p,
+        body:not(:has(.public-site)) .card li,
+        body:not(:has(.public-site)) .card label,
+        body:not(:has(.public-site)) .card span[style*="color: #ffffff"],
+        body:not(:has(.public-site)) [style*="color: #ffffff"]:not(.btn):not(.badge),
+        body:not(:has(.public-site)) [style*="color: white"]:not(.btn):not(.badge) {
+            color: #40574a !important;
+        }
+
+        body:not(:has(.public-site)) .btn-primary,
+        body:not(:has(.public-site)) .btn-gold {
+            background: #245947 !important;
+            color: #ffffff !important;
+            box-shadow: 0 5px 16px rgba(36, 89, 71, 0.18);
+        }
+
+        body:not(:has(.public-site)) .btn-primary:hover,
+        body:not(:has(.public-site)) .btn-gold:hover {
+            background: #163d31 !important;
+        }
+
+        body:not(:has(.public-site)) .btn-secondary {
+            background: #ffffff;
+            border-color: #d4e0d0;
+            color: #245947;
+        }
+
+        body:not(:has(.public-site)) .form-label {
+            color: #314a3b;
+        }
+
+        body:not(:has(.public-site)) .form-control {
+            background: #ffffff;
+            border-color: #cbd8c8;
+            color: #20372c;
+        }
+
+        body:not(:has(.public-site)) .form-control:focus {
+            border-color: #478267;
+            box-shadow: 0 0 0 3px rgba(71, 130, 103, 0.16);
+        }
+
+        body:not(:has(.public-site)) .data-table th {
+            background: #edf3e9;
+            color: #245947;
+            border-color: #dfe5da;
+        }
+
+        body:not(:has(.public-site)) .data-table td {
+            border-color: #e8ece4;
+        }
+
+        body:not(:has(.public-site)) .data-table tr:hover td {
+            background: #f5f8f2;
+        }
+
+        body:not(:has(.public-site)) .badge-teacher,
+        body:not(:has(.public-site)) .badge-grade,
+        body:not(:has(.public-site)) .badge-honors {
+            background: #edf3e9;
+            border-color: #d4e0d0;
+            color: #245947;
+        }
+
+        body:not(:has(.public-site)) [style*="rgba(15, 23, 42"],
+        body:not(:has(.public-site)) [style*="rgba(10, 16, 32"],
+        body:not(:has(.public-site)) [style*="rgba(20, 30, 55"] {
+            background: #f3f6ef !important;
+            border-color: #dfe5da !important;
+        }
+
+        body:not(:has(.public-site)) [style*="rgba(6, 182, 212"],
+        body:not(:has(.public-site)) [style*="rgba(59, 130, 246"],
+        body:not(:has(.public-site)) [style*="rgba(139, 92, 246"] {
+            background: #edf3e9 !important;
+            border-color: #d4e0d0 !important;
+        }
+
+        body:not(:has(.public-site)) [style*="linear-gradient(135deg, #06b6d4"],
+        body:not(:has(.public-site)) [style*="linear-gradient(135deg, rgba(6, 182, 212"],
+        body:not(:has(.public-site)) [style*="linear-gradient(135deg, rgba(15, 23, 42"] {
+            background: #edf3e9 !important;
+        }
+
+        body:not(:has(.public-site)) [style*="color: #67e8f9"],
+        body:not(:has(.public-site)) [style*="color: #60a5fa"],
+        body:not(:has(.public-site)) [style*="color: #93c5fd"] {
+            color: #245947 !important;
+        }
+
+        body:not(:has(.public-site)) .flash-info {
+            background: #edf3e9;
+            border-color: #d4e0d0;
+            color: #245947;
+        }
+
         @media (max-width: 992px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-glass); padding: 1.25rem; }
@@ -710,6 +889,20 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M3 13h18M5 21h14a2 2 0 002-2V9H3v10a2 2 0 002 2z" />
                     </svg>
                     <span>Manage Classes</span>
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+
+        {% if g.user.role in ['Admin', 'Department'] %}
+        <div class="nav-section-title">Account</div>
+        <ul class="nav-links">
+            <li>
+                <a href="{{ url_for('change_password') }}" class="nav-link {% if request.endpoint == 'change_password' %}active{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V7a4.5 4.5 0 00-9 0v3.5m-1 0h11a2 2 0 012 2v6a2 2 0 01-2 2h-11a2 2 0 01-2-2v-6a2 2 0 012-2zm5.5 4v2" />
+                    </svg>
+                    <span>Change Password</span>
                 </a>
             </li>
         </ul>
