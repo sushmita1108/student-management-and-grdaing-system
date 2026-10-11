@@ -1,16 +1,16 @@
 # Public deployment
 
-This project is prepared for Render with a managed PostgreSQL database. The Render blueprint uses paid web-service and database plans so the database persists across deploys and restarts.
+This project is prepared for Render's free web-service plan and an external PostgreSQL database. Render's free service has limited resources and may sleep while idle. Use a free PostgreSQL provider such as Neon or Supabase, and review its free-tier quotas, backups, and inactivity policy. The app's local SQLite file is not suitable for hosted persistence.
 
 ## Deploy
 
-1. Push this project to a private GitHub repository. `.gitignore` now excludes `.env`, `.venv`, Python caches, and local instance data. These local `.env` and `instance/school.db` files were previously tracked, so confirm they are removed from the Git index before pushing. Rotate any credentials that have appeared in earlier Git history.
+1. Create a free PostgreSQL database with a provider such as Neon or Supabase and copy its PostgreSQL connection string. Keep it private.
 2. In Render, choose **New > Blueprint**, connect the repository, and select `render.yaml`.
-3. Set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` when prompted. Use an email you control and a unique, strong password; do not send the password in chat or commit it to the repository.
-4. Confirm creation of the web service and PostgreSQL database. Render builds the app and provides the public `https://...onrender.com` URL when deployment completes.
-5. Sign in to `/login` with username `admin` and the bootstrap password. Change the password after the first sign-in if the app's account settings support it.
+3. Set `DATABASE_URL` to the external PostgreSQL connection string, `BOOTSTRAP_ADMIN_EMAIL` to an email you control, and `BOOTSTRAP_ADMIN_PASSWORD` to a unique, strong password. Enter secrets directly in Render; do not send them in chat or commit them.
+4. Confirm creation of the free web service. Render builds the app and provides a public `https://...onrender.com` URL when deployment completes.
+5. Sign in at `/login` with role **Campus Admin**, the bootstrap email, and bootstrap password. Change the password after first sign-in.
 
-The production database is separate from the local SQLite database. Existing local student, subject, and grade data is not copied automatically; import it only through a deliberate, backed-up migration.
+The production database is separate from the local SQLite database. Existing local student, subject, and grade data is not copied automatically; import it only through a deliberate, backed-up migration. Free database plans have storage, compute, backup, and inactivity limits; confirm the provider's current terms before relying on it for real student records.
 
 ## Local Windows production run
 

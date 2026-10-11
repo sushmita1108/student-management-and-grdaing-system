@@ -2,7 +2,7 @@ services:
   - type: web
     name: sns-college-portal
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python -c "from app import init_db_if_empty; init_db_if_empty()" && gunicorn --workers 2 --bind 0.0.0.0:$PORT wsgi:application
     healthCheckPath: /
@@ -12,16 +12,8 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: sns-college-db
-          property: connectionString
+        sync: false
       - key: BOOTSTRAP_ADMIN_PASSWORD
         sync: false
       - key: BOOTSTRAP_ADMIN_EMAIL
         sync: false
-
-databases:
-  - name: sns-college-db
-    databaseName: sns_college
-    user: sns_college
-    plan: basic-256mb
