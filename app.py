@@ -384,12 +384,13 @@ def register():
             else:
                 full_name = username
 
-        existing_user = User.query.filter(
-            (User.email == email) | (User.username == username)
-        ).first()
+        existing_email = User.query.filter(func.lower(User.email) == email).first()
+        if existing_email:
+            return render_template('register.html', existing_email=True)
 
-        if existing_user:
-            flash('Username or Email is already registered.', 'warning')
+        existing_username = User.query.filter(func.lower(User.username) == username).first()
+        if existing_username:
+            flash('That username is already in use. Please choose another one.', 'warning')
             return render_template('register.html')
 
         new_user = User(

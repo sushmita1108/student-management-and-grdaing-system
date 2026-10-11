@@ -22,6 +22,11 @@
         </div>
 
         <div class="card" style="padding: 2.25rem; border-color: rgba(6, 182, 212, 0.35);">
+            {% if existing_email %}
+            <div class="flash-item flash-warning" role="alert" style="display: block; margin-bottom: 1rem;">
+                This email already has an account. <a href="{{ url_for('login') }}" style="color: inherit; font-weight: 800; text-decoration: underline;">Sign in with this email</a> instead.
+            </div>
+            {% endif %}
             <form method="POST" action="{{ url_for('register') }}">
                 {{ csrf_field() }}
                 <div id="name-group" class="form-group">
