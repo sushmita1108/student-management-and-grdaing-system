@@ -17,19 +17,8 @@ from models import db, Student, Subject, Grade, User, AcademicClass
 load_dotenv()
 
 app = Flask(__name__)
-is_vercel = os.getenv('VERCEL') == '1'
-secret_key = os.getenv('SECRET_KEY')
-database_url = os.getenv('DATABASE_URL', 'sqlite:///instance/school.db')
-if is_vercel and not secret_key:
-    raise RuntimeError('Set SECRET_KEY in the Vercel project environment variables.')
-if is_vercel and not database_url.startswith(('postgres://', 'postgresql://', 'postgresql+')):
-    raise RuntimeError('Set DATABASE_URL to a persistent PostgreSQL database in Vercel.')
-if database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql+psycopg://', 1)
-elif database_url.startswith('postgresql://'):
-    database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
-app.config['SECRET_KEY'] = secret_key or 'dev-secret-key-school-mgmt-2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-school-mgmt-2026')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/school.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -1084,5 +1073,3 @@ if __name__ == "__main__":
         db.create_all()
         init_db_if_empty()
     app.run(host="0.0.0.0", port=5000)
-elif is_vercel:
-    init_db_if_empty()
