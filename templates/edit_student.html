@@ -77,7 +77,7 @@
             <div class="form-group">
                 <label class="form-label" for="status">Academic Status</label>
                 <select id="status" name="status" class="form-control" required>
-                    <option value="Undergraduated" {% if student.status == 'Undergraduated' or 'Graduated' not in student.status %}selected{% endif %}>Undergraduated</option>
+                    <option value="Undergraduated" {% if student.status == 'Undergraduated' or 'Graduated' not in student.status %}selected{% endif %}>Enrolled</option>
                     <option value="Graduated" {% if student.status == 'Graduated' %}selected{% endif %}>Graduated</option>
                 </select>
             </div>

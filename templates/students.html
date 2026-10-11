@@ -21,16 +21,44 @@
 </div>
 
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-        {% if current_user.role != 'Student' %}
-            <div style="position: relative; min-width: 320px;">
-                <input type="text" id="scholarSearch" class="form-control" placeholder="🔍 Search scholars by name, SNS-ID, or degree track..." onkeyup="filterScholars()">
-            </div>
-        {% endif %}
-        <div style="display: flex; gap: 0.5rem;">
-            <span class="badge" style="background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan-light); padding: 0.55rem 0.9rem; border: 1px solid rgba(6, 182, 212, 0.3);">Total Candidates: {{ students|length }}</span>
+    {% if current_user.role != 'Student' %}
+    <form method="GET" action="{{ url_for('students') }}" style="display: flex; align-items: end; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1 1 220px; margin: 0;">
+            <label class="form-label" for="search">Search students</label>
+            <input type="search" id="search" name="search" class="form-control" value="{{ search_query }}" placeholder="Name, student code, or email">
         </div>
-    </div>
+        {% if current_user.role == 'Admin' %}
+        <div class="form-group" style="flex: 0 1 190px; margin: 0;">
+            <label class="form-label" for="department-filter">Department</label>
+            <select id="department-filter" name="department" class="form-control">
+                <option value="">All departments</option>
+                {% for department in departments %}
+                <option value="{{ department }}" {% if department_filter == department %}selected{% endif %}>{{ department }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="form-group" style="flex: 0 1 220px; margin: 0;">
+            <label class="form-label" for="faculty-filter">Faculty / Program</label>
+            <select id="faculty-filter" name="faculty" class="form-control">
+                <option value="">All faculties</option>
+                {% for faculty in faculties %}
+                <option value="{{ faculty }}" {% if faculty_filter == faculty %}selected{% endif %}>{{ faculty }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="flex: 0 1 165px; margin: 0;">
+            <label class="form-label" for="status-filter">Academic status</label>
+            <select id="status-filter" name="status" class="form-control">
+                <option value="">All statuses</option>
+                <option value="Undergraduated" {% if status_filter == 'Undergraduated' %}selected{% endif %}>Enrolled</option>
+                <option value="Graduated" {% if status_filter == 'Graduated' %}selected{% endif %}>Graduated</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Apply filters</button>
+        <span class="badge badge-active">{{ students|length }} students</span>
+    </form>
+    {% endif %}
 
     <div class="table-responsive">
         <table class="data-table" id="scholarsTable">
@@ -82,7 +110,7 @@
                             </span>
                         {% else %}
                             <span class="badge badge-active">
-                                ● Undergraduated
+                                ● Enrolled
                             </span>
                         {% endif %}
                     </td>
@@ -113,22 +141,3 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-function filterScholars() {
-    const input = document.getElementById('scholarSearch');
-    const filter = input.value.toLowerCase();
-    const table = document.getElementById('scholarsTable');
-    const tr = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < tr.length; i++) {
-        const tdText = tr[i].textContent || tr[i].innerText;
-        if (tdText.toLowerCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-        } else {
-            tr[i].style.display = "none";
-        }
-    }
-}
-</script>
-{% endblock %}

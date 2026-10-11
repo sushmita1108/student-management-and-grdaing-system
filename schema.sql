@@ -14,6 +14,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(20) DEFAULT 'Student',
     department VARCHAR(80) DEFAULT 'General',
+    faculty VARCHAR(120) DEFAULT 'General',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

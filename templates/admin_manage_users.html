@@ -5,15 +5,40 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">Manage SNS College Accounts</h1>
-        <p class="page-subtitle">Create, edit, or remove teacher, department, and student accounts.</p>
+        <h1 class="page-title">{{ 'Manage Department Teachers' if managed_role else 'Manage SNS College Accounts' }}</h1>
+        <p class="page-subtitle">{{ 'Manage teacher accounts assigned to your department.' if managed_role else 'Create, edit, or remove teacher, department, and student accounts.' }}</p>
     </div>
     <div>
-        <a href="{{ url_for('admin_create_user') }}" class="btn btn-primary">+ Create User Account</a>
+        <a href="{{ url_for('admin_create_user') }}" class="btn btn-primary">+ {{ 'Add Teacher' if managed_role else 'Create User Account' }}</a>
     </div>
 </div>
 
 <div class="card">
+    {% if faculties or departments %}
+    <form method="GET" action="{{ url_for('admin_manage_users') }}" style="display: flex; align-items: end; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+        {% if current_user.role == 'Admin' %}
+        <div class="form-group" style="width: min(100%, 250px); margin: 0;">
+            <label class="form-label" for="teacher-department-filter">Department</label>
+            <select id="teacher-department-filter" class="form-control" name="department">
+                <option value="">All departments</option>
+                {% for department in departments %}
+                <option value="{{ department }}" {% if department_filter == department %}selected{% endif %}>{{ department }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="form-group" style="width: min(100%, 340px); margin: 0;">
+            <label class="form-label" for="teacher-faculty-filter">Faculty / Program</label>
+            <select id="teacher-faculty-filter" class="form-control" name="faculty">
+                <option value="">All faculties</option>
+                {% for faculty in faculties %}
+                <option value="{{ faculty }}" {% if faculty_filter == faculty %}selected{% endif %}>{{ faculty }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter teachers</button>
+    </form>
+    {% endif %}
     <div class="table-responsive">
         <table class="data-table">
             <thead>
@@ -22,6 +47,7 @@
                     <th>Role</th>
                     <th>Email</th>
                     <th>Department</th>
+                    <th>Faculty / Program</th>
                     <th>Created</th>
                     <th style="text-align: right;">Actions</th>
                 </tr>
@@ -33,6 +59,7 @@
                     <td>{{ user.role }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.department or 'General' }}</td>
+                    <td>{{ user.faculty or 'General' }}</td>
                     <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '–' }}</td>
                     <td style="text-align: right;">
                         <div style="display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap;">
@@ -46,7 +73,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No additional user accounts have been registered yet.</td>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No teacher accounts match this department and faculty.</td>
                 </tr>
                 {% endfor %}
             </tbody>

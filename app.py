@@ -9,7 +9,7 @@ from flask_wtf import CSRFProtect
 # pyrefly: ignore [missing-import]
 from flask_wtf.csrf import generate_csrf, CSRFError
 # pyrefly: ignore [missing-import]
-from sqlalchemy import func
+from sqlalchemy import func, inspect, text
 # pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 from models import db, Student, Subject, Grade, User, AcademicClass
@@ -81,6 +81,11 @@ def init_db_if_empty():
     with app.app_context():
         db.create_all()
 
+        user_columns = {column['name'] for column in inspect(db.engine).get_columns('users')}
+        if 'faculty' not in user_columns:
+            with db.engine.begin() as connection:
+                connection.execute(text("ALTER TABLE users ADD COLUMN faculty VARCHAR(120) DEFAULT 'General'"))
+
         db_path = None
         if db.engine.dialect.name == 'sqlite':
             if getattr(db.engine.url, 'database', None):
@@ -99,6 +104,9 @@ def init_db_if_empty():
                 existing_columns = [column[1] for column in cursor.fetchall()]
                 if 'department' not in existing_columns:
                     cursor.execute("ALTER TABLE users ADD COLUMN department VARCHAR(80) DEFAULT 'Engineering'")
+                    conn.commit()
+                if 'faculty' not in existing_columns:
+                    cursor.execute("ALTER TABLE users ADD COLUMN faculty VARCHAR(120) DEFAULT 'General'")
                     conn.commit()
 
                 cursor.execute("PRAGMA table_info(students)")
@@ -532,14 +540,31 @@ def admin_manage_users():
         flash('Only administrators and department heads can manage teacher accounts.', 'warning')
         return redirect(url_for('dashboard'))
 
-    users_query = User.query.filter_by(role='Teacher')
+    users_query = User.query.filter_by(role='Teacher') if g.user.role == 'Department' else User.query.filter(User.role != 'Admin')
+    department_filter = request.args.get('department', '').strip()
     if g.user.role == 'Department':
         users_query = users_query.filter_by(department=g.user.department)
+    elif department_filter:
+        users_query = users_query.filter_by(department=department_filter)
+    faculty_filter = request.args.get('faculty', '').strip()
+    if faculty_filter:
+        users_query = users_query.filter_by(faculty=faculty_filter)
     users = users_query.order_by(User.full_name).all()
+    faculties_query = db.session.query(User.faculty).filter_by(role='Teacher').distinct()
+    departments = [row[0] for row in db.session.query(User.department).filter(User.role != 'Admin').distinct().order_by(User.department).all() if row[0]]
+    if g.user.role == 'Department':
+        faculties_query = faculties_query.filter_by(department=g.user.department)
+    elif department_filter:
+        faculties_query = faculties_query.filter_by(department=department_filter)
+    faculties = [row[0] for row in faculties_query.order_by(User.faculty).all() if row[0]]
     return render_template(
         'admin_manage_users.html',
         users=users,
-        managed_role='Teacher' if g.user.role == 'Department' else None
+        managed_role='Teacher' if g.user.role == 'Department' else None,
+        faculties=faculties,
+        faculty_filter=faculty_filter,
+        departments=departments,
+        department_filter=department_filter
     )
 
 @app.route('/admin/users/create', methods=['GET', 'POST'])
@@ -556,6 +581,7 @@ def admin_create_user():
         password = request.form.get('password', '').strip()
         role = request.form.get('role', 'Teacher').strip().title()
         department = request.form.get('department', '').strip()
+        faculty = request.form.get('faculty', '').strip()
 
         if g.user.role == 'Department':
             role = 'Teacher'
@@ -567,6 +593,10 @@ def admin_create_user():
         if not all([full_name, username, email, password]):
             flash('All fields are required to create an account.', 'danger')
             return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=ROLE_CHOICES, managed_role='Teacher' if g.user.role == 'Department' else None)
+
+        if g.user.role == 'Department' and not faculty:
+            flash('Faculty / program is required for a department teacher account.', 'danger')
+            return render_template('admin_edit_user.html', user=None, ROLE_CHOICES=['Teacher'], managed_role='Teacher')
 
         if not email.endswith('@sns.edu.np'):
             flash('User email must end with @sns.edu.np.', 'danger')
@@ -582,7 +612,8 @@ def admin_create_user():
             username=username,
             email=email,
             role=role,
-            department=department if role in ['Department', 'Teacher'] else 'General'
+            department=department if role in ['Department', 'Teacher'] else 'General',
+            faculty=faculty if role == 'Teacher' and faculty else 'General'
         )
         new_user.set_password(password)
         db.session.add(new_user)
@@ -614,9 +645,11 @@ def admin_edit_user(user_id):
         user.email = request.form.get('email', '').strip().lower()
         role = request.form.get('role', 'Teacher').strip().title()
         user.department = request.form.get('department', '').strip() if role in ['Department', 'Teacher'] else 'General'
+        user.faculty = request.form.get('faculty', '').strip() if role == 'Teacher' else 'General'
         if g.user.role == 'Department':
             role = 'Teacher'
             user.department = g.user.department
+            user.faculty = request.form.get('faculty', '').strip()
         password = request.form.get('password', '').strip()
 
         if role not in ROLE_CHOICES:
@@ -679,16 +712,34 @@ def admin_manage_subjects():
 
     subjects_query = Subject.query
     teachers_query = User.query.filter_by(role='Teacher')
+    department_filter = request.args.get('department', '').strip()
+    faculty_filter = request.args.get('faculty', '').strip()
     if g.user.role == 'Department':
         subjects_query = subjects_query.filter_by(department=g.user.department)
         teachers_query = teachers_query.filter_by(department=g.user.department)
+    elif department_filter:
+        subjects_query = subjects_query.filter_by(department=department_filter)
+        teachers_query = teachers_query.filter_by(department=department_filter)
+    if faculty_filter:
+        subjects_query = subjects_query.filter_by(faculty=faculty_filter)
     subjects = subjects_query.order_by(Subject.faculty, Subject.code).all()
     teachers = teachers_query.order_by(User.full_name).all()
+    faculty_query = db.session.query(Subject.faculty).distinct()
+    departments = [row[0] for row in db.session.query(Subject.department).distinct().order_by(Subject.department).all() if row[0]]
+    if g.user.role == 'Department':
+        faculty_query = faculty_query.filter_by(department=g.user.department)
+    elif department_filter:
+        faculty_query = faculty_query.filter_by(department=department_filter)
+    faculties = [row[0] for row in faculty_query.order_by(Subject.faculty).all() if row[0]]
     return render_template(
         'admin_manage_subjects.html',
         subjects=subjects,
         teachers=teachers,
-        managed_department=g.user.department if g.user.role == 'Department' else None
+        managed_department=g.user.department if g.user.role == 'Department' else None,
+        faculties=faculties,
+        faculty_filter=faculty_filter,
+        departments=departments,
+        department_filter=department_filter
     )
 
 @app.route('/admin/subjects/create', methods=['GET', 'POST'])
@@ -725,8 +776,8 @@ def admin_create_subject():
 
         if assigned_teacher_id:
             assigned_teacher = User.query.filter_by(id=assigned_teacher_id, role='Teacher', department=department).first()
-            if not assigned_teacher:
-                flash('Choose a teacher from the subject department.', 'danger')
+            if not assigned_teacher or assigned_teacher.faculty not in ['General', faculty]:
+                flash('Choose a teacher from the subject department and faculty.', 'danger')
                 return render_template('admin_edit_subject.html', subject=None, teachers=teachers, managed_department=g.user.department if g.user.role == 'Department' else None)
 
         subject = Subject(code=code, name=name, department=department, academic_period=academic_period, faculty=faculty, level=level, credits=int(credits))
@@ -787,8 +838,8 @@ def admin_edit_subject(subject_id):
                 role='Teacher',
                 department=subject.department
             ).first()
-            if not assigned_teacher:
-                flash('Choose a teacher from the subject department.', 'danger')
+            if not assigned_teacher or assigned_teacher.faculty not in ['General', subject.faculty]:
+                flash('Choose a teacher from the subject department and faculty.', 'danger')
                 return render_template('admin_edit_subject.html', subject=subject, teachers=teachers, managed_department=g.user.department if g.user.role == 'Department' else None)
 
         db.session.commit()
@@ -1072,6 +1123,10 @@ def delete_student(id):
 @app.route('/grades', methods=['GET', 'POST'])
 @login_required
 def grades():
+    department_filter = request.args.get('department', '').strip()
+    faculty_filter = request.args.get('faculty', '').strip()
+    status_filter = request.args.get('status', '').strip()
+
     if request.method == 'POST':
         if g.user.role == 'Student':
             flash('Students cannot submit grade evaluations.', 'warning')
@@ -1118,8 +1173,14 @@ def grades():
         all_subjects = Subject.query.all()
     elif g.user.role == 'Department':
         dept = g.user.department
-        all_grades = Grade.query.join(Student).filter(Student.department == dept).order_by(Grade.created_at.desc()).all()
-        all_students = Student.query.filter_by(department=dept).order_by(Student.first_name).all()
+        student_query = Student.query.filter_by(department=dept)
+        if faculty_filter:
+            student_query = student_query.filter_by(faculty=faculty_filter)
+        if status_filter in ['Undergraduated', 'Graduated']:
+            student_query = student_query.filter_by(status=status_filter)
+        student_ids = [student.id for student in student_query.all()]
+        all_grades = Grade.query.filter(Grade.student_id.in_(student_ids)).order_by(Grade.created_at.desc()).all() if student_ids else []
+        all_students = student_query.order_by(Student.first_name).all()
         all_subjects = Subject.query.filter_by(department=dept).order_by(Subject.code).all()
         if not all_subjects:
             all_subjects = Subject.query.order_by(Subject.code).all()
@@ -1128,11 +1189,39 @@ def grades():
         all_students = Student.query.all()
         all_subjects = Subject.query.filter_by(assigned_teacher_id=g.user.id).all()
     else:
-        all_grades = Grade.query.order_by(Grade.created_at.desc()).all()
-        all_students = Student.query.all()
-        all_subjects = Subject.query.all()
+        student_query = Student.query
+        if department_filter:
+            student_query = student_query.filter_by(department=department_filter)
+        if faculty_filter:
+            student_query = student_query.filter_by(faculty=faculty_filter)
+        if status_filter in ['Undergraduated', 'Graduated']:
+            student_query = student_query.filter_by(status=status_filter)
+        student_ids = [student.id for student in student_query.all()]
+        all_grades = Grade.query.filter(Grade.student_id.in_(student_ids)).order_by(Grade.created_at.desc()).all() if student_ids else []
+        all_students = student_query.order_by(Student.department, Student.last_name, Student.first_name).all()
+        all_subjects = Subject.query.order_by(Subject.department, Subject.code).all()
 
-    return render_template('grades.html', grades=all_grades, students=all_students, subjects=all_subjects)
+    departments_query = db.session.query(Student.department).distinct()
+    faculties_query = db.session.query(Student.faculty).distinct()
+    if g.user.role == 'Department':
+        departments_query = departments_query.filter(Student.department == g.user.department)
+        faculties_query = faculties_query.filter(Student.department == g.user.department)
+    elif department_filter:
+        faculties_query = faculties_query.filter(Student.department == department_filter)
+    departments = [row[0] for row in departments_query.order_by(Student.department).all() if row[0]]
+    faculties = [row[0] for row in faculties_query.order_by(Student.faculty).all() if row[0]]
+
+    return render_template(
+        'grades.html',
+        grades=all_grades,
+        students=all_students,
+        subjects=all_subjects,
+        departments=departments,
+        faculties=faculties,
+        department_filter=department_filter,
+        faculty_filter=faculty_filter,
+        status_filter=status_filter
+    )
 
 @app.route('/profile')
 @login_required

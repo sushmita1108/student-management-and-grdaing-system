@@ -28,6 +28,9 @@
 
         <div class="form-group">
             <label class="form-label" for="department">Department</label>
+            {% if managed_department %}
+            <input class="form-control" value="{{ managed_department }}" disabled>
+            {% else %}
             <select id="department" name="department" class="form-control" required>
                 {% set dept_value = subject.department if subject else 'Engineering' %}
                 <option value="Engineering" {% if dept_value == 'Engineering' %}selected{% endif %}>Engineering</option>
@@ -35,6 +38,7 @@
                 <option value="Management" {% if dept_value == 'Management' %}selected{% endif %}>Management</option>
                 <option value="Science and Humanities" {% if dept_value == 'Science and Humanities' %}selected{% endif %}>Science and Humanities</option>
             </select>
+            {% endif %}
         </div>
 
         <div class="form-group">
@@ -72,7 +76,7 @@
             <select id="assigned_teacher_id" name="assigned_teacher_id" class="form-control">
                 <option value="">No Assigned Teacher</option>
                 {% for teacher in teachers %}
-                <option value="{{ teacher.id }}" {% if subject and subject.assigned_teacher_id == teacher.id %}selected{% endif %}>{{ teacher.full_name }} ({{ teacher.email }})</option>
+                <option value="{{ teacher.id }}" data-faculty="{{ teacher.faculty or 'General' }}" {% if subject and subject.assigned_teacher_id == teacher.id %}selected{% endif %}>{{ teacher.full_name }} ({{ teacher.faculty or 'General' }})</option>
                 {% endfor %}
             </select>
         </div>
@@ -83,4 +87,27 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const facultyInput = document.getElementById('faculty');
+    const teacherSelect = document.getElementById('assigned_teacher_id');
+    if (!facultyInput || !teacherSelect) return;
+
+    function filterTeachers() {
+        const faculty = facultyInput.value.trim().toLowerCase();
+        for (const option of teacherSelect.options) {
+            if (!option.value) continue;
+            const teacherFaculty = (option.dataset.faculty || 'General').toLowerCase();
+            option.hidden = Boolean(faculty && teacherFaculty !== 'general' && teacherFaculty !== faculty);
+            if (option.selected && option.hidden) teacherSelect.value = '';
+        }
+    }
+
+    facultyInput.addEventListener('input', filterTeachers);
+    filterTeachers();
+});
+</script>
 {% endblock %}

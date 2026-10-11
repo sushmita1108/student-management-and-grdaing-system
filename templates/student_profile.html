@@ -3,6 +3,60 @@
 {% block title %}My Student Profile | SNS College{% endblock %}
 
 {% block content %}
+<style>
+    .student-profile-page .page-header { margin-bottom: 1rem; }
+    .student-profile-overview {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.9fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: stretch;
+    }
+    .student-profile-card,
+    .student-summary-card { padding: 1.25rem; margin: 0; }
+    .student-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.55rem 1.1rem;
+        font-size: 0.88rem;
+        line-height: 1.35;
+    }
+    .student-detail-grid strong { color: #245947; }
+    .student-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+    .student-summary-metric {
+        min-height: 74px;
+        padding: 0.7rem 0.8rem;
+        border: 1px solid #dfe5da;
+        border-radius: 8px;
+        background: #f3f6ef;
+    }
+    .student-summary-label {
+        color: #65766b;
+        font-size: 0.7rem;
+        font-weight: 700;
+        line-height: 1.25;
+        text-transform: uppercase;
+    }
+    .student-summary-value {
+        margin-top: 0.35rem;
+        color: #245947;
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1.15;
+    }
+    .student-report-card { padding: 1.25rem; }
+    @media (max-width: 760px) {
+        .student-profile-overview { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+        .student-detail-grid { grid-template-columns: 1fr; }
+    }
+</style>
+<div class="student-profile-page">
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h1 class="page-title">My Student Profile</h1>
@@ -11,46 +65,46 @@
     <a href="{{ url_for('grades') }}" class="btn btn-primary">View Full Transcript</a>
 </div>
 
-<div style="display: grid; grid-template-columns: minmax(0, 380px) 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-    <div class="card" style="padding: 1.75rem; border: 1px solid rgba(6, 182, 212, 0.3);">
-        <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; color: var(--accent-cyan-light);">Student Profile</h2>
-        <div style="display: grid; gap: 0.9rem;">
+<div class="student-profile-overview">
+    <div class="card student-profile-card">
+        <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.8rem; color: var(--accent-cyan-light);">Student Profile</h2>
+        <div class="student-detail-grid">
             <div><strong>Name:</strong> {{ student.full_name }}</div>
             <div><strong>SNS ID:</strong> {{ student.student_code }}</div>
             <div><strong>Email:</strong> {{ student.email }}</div>
             <div><strong>Program:</strong> {{ student.grade_level }}</div>
             <div><strong>Faculty:</strong> {{ student.faculty }}</div>
             <div><strong>Academic Period:</strong> {{ student.academic_period }}</div>
-            <div><strong>Status:</strong> {{ student.status }}</div>
+            <div><strong>Status:</strong> {{ 'Enrolled' if student.status == 'Undergraduated' else student.status }}</div>
             <div><strong>Created:</strong> {{ student.created_at.strftime('%b %d, %Y') }}</div>
             <div><strong>Cumulative GPA:</strong> {{ "%.2f"|format(student.gpa) }} / 4.0</div>
         </div>
     </div>
 
-    <div class="card" style="padding: 1.75rem; border: 1px solid rgba(245, 158, 11, 0.3);">
-        <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; color: var(--accent-gold);">Academic Summary</h2>
-        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem;">
-            <div style="padding: 1rem; border-radius: 14px; background: rgba(6, 182, 212, 0.08);">
-                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Total Report Cards</div>
-                <div style="font-size: 2rem; font-weight: 800; margin-top: 0.45rem;">{{ report_cards|length }}</div>
+    <div class="card student-summary-card">
+        <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.8rem; color: var(--accent-gold);">Academic Summary</h2>
+        <div class="student-summary-grid">
+            <div class="student-summary-metric">
+                <div class="student-summary-label">Report cards</div>
+                <div class="student-summary-value">{{ report_cards|length }}</div>
             </div>
-            <div style="padding: 1rem; border-radius: 14px; background: rgba(59, 130, 246, 0.08);">
-                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Total ECTS Credits</div>
-                <div style="font-size: 2rem; font-weight: 800; margin-top: 0.45rem;">{{ total_credits }}</div>
+            <div class="student-summary-metric">
+                <div class="student-summary-label">ECTS credits</div>
+                <div class="student-summary-value">{{ total_credits }}</div>
             </div>
-            <div style="padding: 1rem; border-radius: 14px; background: rgba(245, 158, 11, 0.08);">
-                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Current GPA</div>
-                <div style="font-size: 2rem; font-weight: 800; margin-top: 0.45rem;">{{ "%.2f"|format(student.gpa) }}</div>
+            <div class="student-summary-metric">
+                <div class="student-summary-label">Current GPA</div>
+                <div class="student-summary-value">{{ "%.2f"|format(student.gpa) }}</div>
             </div>
-            <div style="padding: 1rem; border-radius: 14px; background: rgba(16, 185, 129, 0.08);">
-                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Academic Status</div>
-                <div style="font-size: 1.25rem; font-weight: 700; margin-top: 0.45rem;">{{ student.status }}</div>
+            <div class="student-summary-metric">
+                <div class="student-summary-label">Academic status</div>
+                <div class="student-summary-value" style="font-size: 1rem;">{{ 'Enrolled' if student.status == 'Undergraduated' else student.status }}</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card">
+<div class="card student-report-card">
     <h2 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem;">Per-Subject Report Card</h2>
     <div class="table-responsive">
         <table class="data-table">
@@ -88,4 +142,5 @@
         </table>
     </div>
 </div>
+ </div>
 {% endblock %}
