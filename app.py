@@ -397,7 +397,8 @@ def register():
             username=username,
             email=email,
             role=role,
-            department=department if role in ['Student', 'Department', 'Teacher'] else 'General'
+            department=department if role in ['Student', 'Department', 'Teacher'] else 'General',
+            faculty=faculty if role in ['Student', 'Teacher'] else 'General'
         )
         new_user.set_password(password)
         db.session.add(new_user)
@@ -556,7 +557,7 @@ def admin_manage_users():
     if faculty_filter:
         users_query = users_query.filter_by(faculty=faculty_filter)
     users = users_query.order_by(User.full_name).all()
-    faculties_query = db.session.query(User.faculty).filter_by(role='Teacher').distinct()
+    faculties_query = db.session.query(User.faculty).filter(User.role != 'Admin').distinct()
     departments = [row[0] for row in db.session.query(User.department).filter(User.role != 'Admin').distinct().order_by(User.department).all() if row[0]]
     if g.user.role == 'Department':
         faculties_query = faculties_query.filter_by(department=g.user.department)

@@ -18,8 +18,8 @@
     <form method="GET" action="{{ url_for('admin_manage_users') }}" style="display: flex; align-items: end; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
         {% if current_user.role == 'Admin' %}
         <div class="form-group" style="width: min(100%, 250px); margin: 0;">
-            <label class="form-label" for="teacher-department-filter">Department</label>
-            <select id="teacher-department-filter" class="form-control" name="department">
+            <label class="form-label" for="account-department-filter">Department</label>
+            <select id="account-department-filter" class="form-control" name="department">
                 <option value="">All departments</option>
                 {% for department in departments %}
                 <option value="{{ department }}" {% if department_filter == department %}selected{% endif %}>{{ department }}</option>
@@ -28,15 +28,15 @@
         </div>
         {% endif %}
         <div class="form-group" style="width: min(100%, 340px); margin: 0;">
-            <label class="form-label" for="teacher-faculty-filter">Faculty / Program</label>
-            <select id="teacher-faculty-filter" class="form-control" name="faculty">
+            <label class="form-label" for="account-faculty-filter">Faculty / Program</label>
+            <select id="account-faculty-filter" class="form-control" name="faculty">
                 <option value="">All faculties</option>
                 {% for faculty in faculties %}
                 <option value="{{ faculty }}" {% if faculty_filter == faculty %}selected{% endif %}>{{ faculty }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Filter teachers</button>
+        <button type="submit" class="btn btn-primary">Filter accounts</button>
     </form>
     {% endif %}
     <div class="table-responsive">
@@ -73,7 +73,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No teacher accounts match this department and faculty.</td>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No accounts match this department and faculty.</td>
                 </tr>
                 {% endfor %}
             </tbody>
